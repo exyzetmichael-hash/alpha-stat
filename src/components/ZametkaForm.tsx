@@ -1,0 +1,73 @@
+"use client";
+
+import { useActionState, useRef } from "react";
+import { createZametka, updateZametka } from "@/lib/actions/zametka";
+import type { ActionState } from "@/lib/actions/filial";
+import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/FormError";
+
+export function ZametkaForm({
+  mode,
+  sezonId,
+  defaultValues,
+  onDone,
+}: {
+  mode: "create" | "edit";
+  sezonId: string;
+  defaultValues?: { id: string; details: string | null; idea: string | null };
+  onDone?: () => void;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const action = mode === "create" ? createZametka : updateZametka;
+  const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
+    const result = await action(prevState, formData);
+    if (!result) {
+      if (mode === "create") formRef.current?.reset();
+      onDone?.();
+    }
+    return result;
+  }, null);
+
+  return (
+    <form ref={formRef} action={formAction} className="space-y-3">
+      <input type="hidden" name="sezonId" value={sezonId} />
+      {defaultValues && <input type="hidden" name="id" value={defaultValues.id} />}
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Подробности события</label>
+        <textarea
+          name="details"
+          defaultValue={defaultValues?.details ?? ""}
+          rows={2}
+          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">Идея сценария и фишки</label>
+        <textarea
+          name="idea"
+          defaultValue={defaultValues?.idea ?? ""}
+          rows={2}
+          placeholder="Например: сувенир с собой — веточка с ленточкой"
+          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
+        />
+      </div>
+
+      <FormError message={state?.error} />
+      <div className="flex gap-2">
+        <SubmitButton pendingLabel="Сохраняю...">{mode === "create" ? "Добавить заметку" : "Сохранить"}</SubmitButton>
+        {mode === "edit" && (
+          <button
+            type="button"
+            onClick={onDone}
+            className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600"
+          >
+            Отмена
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}

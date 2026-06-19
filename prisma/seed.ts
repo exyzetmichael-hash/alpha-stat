@@ -18,6 +18,9 @@ const STANDARD_ROLES = [
 
 const DEFAULT_FILIALS = ["Филиал 1", "Филиал 2"];
 
+const STANDARD_RASHOD_CATEGORIES = ["Ужины", "Покупки", "Помощь в выезде", "Подарки на выпускной"];
+const STANDARD_DOHOD_CATEGORIES = ["Церковь", "Домашние группы", "Команда", "Другие"];
+
 async function main() {
   for (const name of STANDARD_ROLES) {
     await prisma.rol.upsert({
@@ -32,6 +35,22 @@ async function main() {
     if (!existing) {
       await prisma.filial.create({ data: { name } });
     }
+  }
+
+  for (const name of STANDARD_RASHOD_CATEGORIES) {
+    await prisma.budjetKategoriya.upsert({
+      where: { tip_name: { tip: "RASHOD", name } },
+      update: {},
+      create: { tip: "RASHOD", name },
+    });
+  }
+
+  for (const name of STANDARD_DOHOD_CATEGORIES) {
+    await prisma.budjetKategoriya.upsert({
+      where: { tip_name: { tip: "DOHOD", name } },
+      update: {},
+      create: { tip: "DOHOD", name },
+    });
   }
 }
 

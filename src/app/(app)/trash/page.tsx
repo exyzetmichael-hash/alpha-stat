@@ -3,7 +3,13 @@ import { restoreFilial } from "@/lib/actions/filial";
 import { restoreSezon } from "@/lib/actions/sezon";
 import { restoreStolik } from "@/lib/actions/stolik";
 import { restoreUchastnik } from "@/lib/actions/uchastnik";
+import { restoreVeha } from "@/lib/actions/veha";
+import { restoreBudjetZapis } from "@/lib/actions/budjet";
+import { restoreReklama } from "@/lib/actions/reklama";
+import { restoreVypusknik } from "@/lib/actions/vypusknik";
+import { restoreZametka } from "@/lib/actions/zametka";
 import { RestoreButton } from "@/components/RestoreButton";
+import { formatDateRu } from "@/lib/format-date";
 
 function TrashRow({ title, subtitle, action }: { title: string; subtitle?: string; action: () => Promise<void> }) {
   return (
@@ -18,7 +24,7 @@ function TrashRow({ title, subtitle, action }: { title: string; subtitle?: strin
 }
 
 export default async function TrashPage() {
-  const [filials, sezony, stoliki, uchastniki] = await Promise.all([
+  const [filials, sezony, stoliki, uchastniki, vehi, budjetZapisi, reklama, vypuskniki, zametki] = await Promise.all([
     prisma.filial.findMany({ where: { deletedAt: { not: null } }, orderBy: { deletedAt: "desc" } }),
     prisma.sezon.findMany({
       where: { deletedAt: { not: null } },
@@ -35,10 +41,43 @@ export default async function TrashPage() {
       include: { sezon: { include: { filial: true } }, stolik: true },
       orderBy: { deletedAt: "desc" },
     }),
+    prisma.veha.findMany({
+      where: { deletedAt: { not: null } },
+      include: { sezon: { include: { filial: true } } },
+      orderBy: { deletedAt: "desc" },
+    }),
+    prisma.budjetZapis.findMany({
+      where: { deletedAt: { not: null } },
+      include: { sezon: { include: { filial: true } } },
+      orderBy: { deletedAt: "desc" },
+    }),
+    prisma.reklama.findMany({
+      where: { deletedAt: { not: null } },
+      include: { sezon: { include: { filial: true } } },
+      orderBy: { deletedAt: "desc" },
+    }),
+    prisma.vypusknik.findMany({
+      where: { deletedAt: { not: null } },
+      include: { sezon: { include: { filial: true } } },
+      orderBy: { deletedAt: "desc" },
+    }),
+    prisma.zametka.findMany({
+      where: { deletedAt: { not: null } },
+      include: { sezon: { include: { filial: true } } },
+      orderBy: { deletedAt: "desc" },
+    }),
   ]);
 
   const isEmpty =
-    filials.length === 0 && sezony.length === 0 && stoliki.length === 0 && uchastniki.length === 0;
+    filials.length === 0 &&
+    sezony.length === 0 &&
+    stoliki.length === 0 &&
+    uchastniki.length === 0 &&
+    vehi.length === 0 &&
+    budjetZapisi.length === 0 &&
+    reklama.length === 0 &&
+    vypuskniki.length === 0 &&
+    zametki.length === 0;
 
   return (
     <div className="space-y-6">
@@ -96,6 +135,76 @@ export default async function TrashPage() {
               title={`${u.name} — ${u.roleName}`}
               subtitle={`${u.sezon.filial.name} · ${u.sezon.name}${u.stolik ? ` · ${u.stolik.name}` : ""}`}
               action={restoreUchastnik.bind(null, u.id, u.sezonId)}
+            />
+          ))}
+        </section>
+      )}
+
+      {vehi.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-gray-700">Вехи / события сезона</h2>
+          {vehi.map((v) => (
+            <TrashRow
+              key={v.id}
+              title={`${v.name} — ${formatDateRu(v.date)}`}
+              subtitle={`${v.sezon.filial.name} · ${v.sezon.name}`}
+              action={restoreVeha.bind(null, v.id, v.sezonId)}
+            />
+          ))}
+        </section>
+      )}
+
+      {budjetZapisi.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-gray-700">Бюджет</h2>
+          {budjetZapisi.map((z) => (
+            <TrashRow
+              key={z.id}
+              title={`${z.categoryName} — ${z.amount.toLocaleString("ru-RU")} ₽`}
+              subtitle={`${z.sezon.filial.name} · ${z.sezon.name}`}
+              action={restoreBudjetZapis.bind(null, z.id, z.sezonId)}
+            />
+          ))}
+        </section>
+      )}
+
+      {reklama.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-gray-700">Рекламная кампания</h2>
+          {reklama.map((r) => (
+            <TrashRow
+              key={r.id}
+              title={`${formatDateRu(r.date)} — ${r.action}`}
+              subtitle={`${r.sezon.filial.name} · ${r.sezon.name}`}
+              action={restoreReklama.bind(null, r.id, r.sezonId)}
+            />
+          ))}
+        </section>
+      )}
+
+      {vypuskniki.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-gray-700">Выпускники</h2>
+          {vypuskniki.map((v) => (
+            <TrashRow
+              key={v.id}
+              title={v.name}
+              subtitle={`${v.sezon.filial.name} · ${v.sezon.name}`}
+              action={restoreVypusknik.bind(null, v.id, v.sezonId)}
+            />
+          ))}
+        </section>
+      )}
+
+      {zametki.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-semibold text-gray-700">Идеи и заметки</h2>
+          {zametki.map((z) => (
+            <TrashRow
+              key={z.id}
+              title={z.details || z.idea || "Заметка"}
+              subtitle={`${z.sezon.filial.name} · ${z.sezon.name}`}
+              action={restoreZametka.bind(null, z.id, z.sezonId)}
             />
           ))}
         </section>

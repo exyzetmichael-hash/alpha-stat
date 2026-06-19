@@ -40,8 +40,13 @@ model Sezon {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  stoliki    Stolik[]
-  uchastniki Uchastnik[]
+  stoliki      Stolik[]
+  uchastniki   Uchastnik[]
+  vehi         Veha[]
+  budjetZapisi BudjetZapis[]
+  reklama      Reklama[]
+  vypuskniki   Vypusknik[]
+  zametki      Zametka[]
 
   @@map("sezony")
 }
@@ -88,4 +93,109 @@ model Uchastnik {
   deletedAt DateTime?
 
   @@map("uchastniki")
+}
+
+// Важные вехи / события сезона (раздел 3.3 ТЗ)
+model Veha {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  name              String
+  date              DateTime
+  participantCount  Int?
+  note              String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("vehi")
+}
+
+enum BudjetTip {
+  RASHOD
+  DOHOD
+}
+
+// Глобальный справочник категорий бюджета (раздел 3.6 ТЗ) — общий для всех сезонов,
+// чтобы итоги по категориям были консистентны между сезонами на дашборде.
+model BudjetKategoriya {
+  id        String    @id @default(cuid())
+  tip       BudjetTip
+  name      String
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@unique([tip, name])
+  @@map("budjet_kategorii")
+}
+
+// Статья бюджета (расход или доход) в рамках сезона (раздел 3.6 ТЗ)
+model BudjetZapis {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  tip          BudjetTip
+  categoryName String
+  amount       Int
+  comment      String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("budjet_zapisi")
+}
+
+// Запись рекламной кампании сезона (раздел 3.4 ТЗ)
+model Reklama {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  date              DateTime
+  action            String // "что делали"
+  materialsNote     String? // остались ли материалы (текст/ссылка)
+  effectivenessNote String? // оценка эффективности (текст)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("reklama")
+}
+
+// Выпускник сезона (раздел 3.5 ТЗ)
+model Vypusknik {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  name             String
+  statusRightAfter String? // "сразу после Альфы"
+  statusSixMonths  String? // "через полгода"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("vypuskniki")
+}
+
+// Идеи и заметки по событиям сезона (раздел 3.7 ТЗ)
+model Zametka {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  details String? // "Подробности события"
+  idea    String? // "Идея сценария и фишки"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("zametki")
 }
