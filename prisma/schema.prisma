@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +8,84 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+model Filial {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  sezony Sezon[]
+
+  @@map("filials")
+}
+
+model Sezon {
+  id        String    @id @default(cuid())
+  filialId  String
+  filial    Filial    @relation(fields: [filialId], references: [id])
+  name      String
+  theme     String?
+  startDate DateTime
+  endDate   DateTime
+
+  // Свободные поля сезона (раздел 3 ТЗ)
+  photoUrl        String?
+  thoughtsNote    String? // "Важные мысли/идеи/впечатления от сезона"
+  nextSeasonNote  String? // "О чём подумать к следующему сезону"
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  stoliki    Stolik[]
+  uchastniki Uchastnik[]
+
+  @@map("sezony")
+}
+
+model Stolik {
+  id        String    @id @default(cuid())
+  sezonId   String
+  sezon     Sezon     @relation(fields: [sezonId], references: [id])
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  uchastniki Uchastnik[]
+
+  @@map("stoliki")
+}
+
+// Глобальный справочник ролей (раздел 3.2 ТЗ) — редактируется без правки кода:
+// при выборе "другое" и вводе нового значения роль автоматически добавляется
+// в этот список и дальше предлагается всем в выпадающем списке.
+model Rol {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  @@map("roli")
+}
+
+model Uchastnik {
+  id       String  @id @default(cuid())
+  sezonId  String
+  sezon    Sezon   @relation(fields: [sezonId], references: [id])
+  stolikId String?
+  stolik   Stolik? @relation(fields: [stolikId], references: [id])
+
+  name     String
+  roleName String
+  note     String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("uchastniki")
 }
