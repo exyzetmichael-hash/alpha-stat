@@ -10,6 +10,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             Сезоны
           </Link>
           <nav className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-800">
+              Дашборд
+            </Link>
             <Link href="/trash" className="text-sm font-medium text-gray-500 hover:text-gray-800">
               Корзина
             </Link>
