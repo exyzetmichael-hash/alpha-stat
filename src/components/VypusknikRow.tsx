@@ -38,7 +38,7 @@ export function VypusknikRow({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-sm text-gray-400 hover:text-gray-700"
+          className="rounded-lg px-1.5 py-1 text-sm text-gray-400 transition-colors hover:text-gray-700"
         >
           Изменить
         </button>

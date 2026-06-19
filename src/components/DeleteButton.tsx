@@ -23,7 +23,7 @@ export function DeleteButton({
         await action();
         setPending(false);
       }}
-      className="text-sm text-gray-400 hover:text-red-600 disabled:opacity-50"
+      className="rounded-lg px-1.5 py-1 text-sm text-gray-400 transition-colors hover:text-red-600 disabled:opacity-50"
     >
       {pending ? "Удаляю..." : label}
     </button>

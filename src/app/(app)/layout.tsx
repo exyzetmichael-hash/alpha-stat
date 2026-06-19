@@ -9,11 +9,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/filials" className="text-lg font-bold text-[#1a1a1a]">
             Сезоны
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-gray-800">
+          <nav className="flex items-center gap-2">
+            <Link
+              href="/dashboard"
+              className="rounded-lg px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
+            >
               Дашборд
             </Link>
-            <Link href="/trash" className="text-sm font-medium text-gray-500 hover:text-gray-800">
+            <Link
+              href="/trash"
+              className="rounded-lg px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
+            >
               Корзина
             </Link>
             <LogoutButton />

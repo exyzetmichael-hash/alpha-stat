@@ -78,7 +78,10 @@ export default async function SezonDetailPage({
 
   return (
     <div className="space-y-8">
-      <Link href={`/filials/${sezon.filialId}`} className="text-sm font-medium text-gray-400 hover:text-gray-700">
+      <Link
+        href={`/filials/${sezon.filialId}`}
+        className="-mx-1.5 -my-1 inline-block rounded-lg px-1.5 py-1 text-sm font-medium text-gray-400 transition-colors hover:text-gray-700"
+      >
         ← {sezon.filial.name}
       </Link>
 

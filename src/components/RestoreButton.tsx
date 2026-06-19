@@ -14,7 +14,7 @@ export function RestoreButton({ action }: { action: () => Promise<void> }) {
         await action();
         setPending(false);
       }}
-      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 disabled:opacity-50"
+      className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-400 hover:bg-gray-50 disabled:opacity-50"
     >
       {pending ? "Восстанавливаю..." : "Восстановить"}
     </button>

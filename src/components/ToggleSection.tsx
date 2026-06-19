@@ -18,7 +18,7 @@ export function ToggleSection({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-xl border border-dashed border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600"
+        className="rounded-xl border border-dashed border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:border-[#E63946]/40 hover:text-[#E63946]"
       >
         {closedLabel}
       </button>
@@ -31,7 +31,7 @@ export function ToggleSection({
       <button
         type="button"
         onClick={() => setOpen(false)}
-        className="text-sm text-gray-400"
+        className="rounded-lg px-1.5 py-1 text-sm text-gray-400 transition-colors hover:text-gray-600"
       >
         {openLabel}
       </button>

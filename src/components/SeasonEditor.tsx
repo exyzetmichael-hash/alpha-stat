@@ -78,7 +78,7 @@ export function SeasonEditor({
         <button
           type="button"
           onClick={() => setEditing(true)}
-          className="text-sm font-medium text-gray-400 hover:text-gray-700"
+          className="rounded-lg px-1.5 py-1 text-sm font-medium text-gray-400 transition-colors hover:text-gray-700"
         >
           Изменить сезон
         </button>
@@ -171,7 +171,7 @@ export function SeasonEditor({
         <button
           type="button"
           onClick={() => setEditing(false)}
-          className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600"
+          className="rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
         >
           Отмена
         </button>
