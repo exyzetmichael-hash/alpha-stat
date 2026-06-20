@@ -11,6 +11,10 @@ import { restoreZametka } from "@/lib/actions/zametka";
 import { RestoreButton } from "@/components/RestoreButton";
 import { formatDateRu } from "@/lib/format-date";
 
+// Корзина читает из базы по запросу, а не статически на этапе сборки —
+// иначе сборке нужна живая база данных.
+export const dynamic = "force-dynamic";
+
 function TrashRow({ title, subtitle, action }: { title: string; subtitle?: string; action: () => Promise<void> }) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">

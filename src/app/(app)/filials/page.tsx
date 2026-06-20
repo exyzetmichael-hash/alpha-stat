@@ -4,6 +4,11 @@ import { softDeleteFilial } from "@/lib/actions/filial";
 import { DeleteButton } from "@/components/DeleteButton";
 import { CreateFilialForm } from "@/components/CreateFilialForm";
 
+// Список филиалов всегда читает свежие данные (в т.ч. счётчик сезонов,
+// который меняется при действиях с сезонами). Рендерим по запросу, а не
+// статически на этапе сборки — иначе сборке нужна живая база данных.
+export const dynamic = "force-dynamic";
+
 export default async function FilialsPage() {
   const filials = await prisma.filial.findMany({
     where: { deletedAt: null },
