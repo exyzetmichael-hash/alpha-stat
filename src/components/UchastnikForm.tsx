@@ -5,6 +5,7 @@ import { createUchastnik, updateUchastnik } from "@/lib/actions/uchastnik";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 const CUSTOM_ROLE_SENTINEL = "__custom__";
 
@@ -26,12 +27,16 @@ export function UchastnikForm({
   const formRef = useRef<HTMLFormElement>(null);
   const defaultRoleIsCustom = defaultValues ? !roles.includes(defaultValues.roleName) : false;
   const [showCustomRole, setShowCustomRole] = useState(defaultRoleIsCustom);
+  const storageKey =
+    mode === "create" ? `draft:uchastnik:create:${sezonId}:${stolikId ?? "none"}` : `draft:uchastnik:edit:${defaultValues!.id}`;
+  useDraftAutosave(storageKey, formRef);
 
   const action = mode === "create" ? createUchastnik : updateUchastnik;
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await action(prevState, formData);
     if (!result) {
       if (mode === "create") formRef.current?.reset();
+      clearDraft(storageKey);
       onDone?.();
     }
     return result;

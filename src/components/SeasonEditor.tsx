@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { updateSezon } from "@/lib/actions/sezon";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
 import { SEZON_STATUS_LABELS, type SezonStatus } from "@/lib/season-status";
 import { formatDateRu } from "@/lib/format-date";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 const STATUS_BADGE_CLASS: Record<SezonStatus, string> = {
   upcoming: "bg-amber-100 text-amber-800",
@@ -37,9 +38,15 @@ export function SeasonEditor({
   status: SezonStatus;
 }) {
   const [editing, setEditing] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const storageKey = `draft:sezon:edit:${sezon.id}`;
+  useDraftAutosave(storageKey, formRef, [editing]);
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await updateSezon(prevState, formData);
-    if (!result) setEditing(false);
+    if (!result) {
+      clearDraft(storageKey);
+      setEditing(false);
+    }
     return result;
   }, null);
 
@@ -87,7 +94,7 @@ export function SeasonEditor({
   }
 
   return (
-    <form action={formAction} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+    <form ref={formRef} action={formAction} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
       <input type="hidden" name="id" value={sezon.id} />
       <input type="hidden" name="filialId" value={filialId} />
 

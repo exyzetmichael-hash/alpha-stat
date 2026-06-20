@@ -5,6 +5,7 @@ import { createVypusknik, updateVypusknik } from "@/lib/actions/vypusknik";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 export function VypusknikForm({
   mode,
@@ -18,12 +19,15 @@ export function VypusknikForm({
   onDone?: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const storageKey = mode === "create" ? `draft:vypusknik:create:${sezonId}` : `draft:vypusknik:edit:${defaultValues!.id}`;
+  useDraftAutosave(storageKey, formRef);
 
   const action = mode === "create" ? createVypusknik : updateVypusknik;
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await action(prevState, formData);
     if (!result) {
       if (mode === "create") formRef.current?.reset();
+      clearDraft(storageKey);
       onDone?.();
     }
     return result;

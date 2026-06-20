@@ -5,6 +5,7 @@ import { createVeha, updateVeha } from "@/lib/actions/veha";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 const STANDARD_VEHA_NAMES = ["Вечеринка (открытие сезона)", "Выезд", "Выпускной", "Богослужение/служение"];
 const CUSTOM_VEHA_SENTINEL = "__custom__";
@@ -27,12 +28,15 @@ export function VehaForm({
   const formRef = useRef<HTMLFormElement>(null);
   const defaultNameIsCustom = defaultValues ? !STANDARD_VEHA_NAMES.includes(defaultValues.name) : false;
   const [showCustomName, setShowCustomName] = useState(defaultNameIsCustom);
+  const storageKey = mode === "create" ? `draft:veha:create:${sezonId}` : `draft:veha:edit:${defaultValues!.id}`;
+  useDraftAutosave(storageKey, formRef);
 
   const action = mode === "create" ? createVeha : updateVeha;
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await action(prevState, formData);
     if (!result) {
       if (mode === "create") formRef.current?.reset();
+      clearDraft(storageKey);
       onDone?.();
     }
     return result;

@@ -5,12 +5,18 @@ import { createSezon } from "@/lib/actions/sezon";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 export function CreateSezonForm({ filialId }: { filialId: string }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const storageKey = `draft:sezon:create:${filialId}`;
+  useDraftAutosave(storageKey, formRef);
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await createSezon(prevState, formData);
-    if (!result) formRef.current?.reset();
+    if (!result) {
+      formRef.current?.reset();
+      clearDraft(storageKey);
+    }
     return result;
   }, null);
 

@@ -5,12 +5,18 @@ import { createStolik } from "@/lib/actions/stolik";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 export function CreateStolikForm({ sezonId }: { sezonId: string }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const storageKey = `draft:stolik:create:${sezonId}`;
+  useDraftAutosave(storageKey, formRef);
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await createStolik(prevState, formData);
-    if (!result) formRef.current?.reset();
+    if (!result) {
+      formRef.current?.reset();
+      clearDraft(storageKey);
+    }
     return result;
   }, null);
 
