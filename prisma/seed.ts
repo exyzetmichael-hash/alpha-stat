@@ -14,6 +14,11 @@ const STANDARD_ROLES = [
   "Молитва",
   "Музыкальное сопровождение",
   "Отпуск",
+  // Роли участников за столиками
+  "Лидер",
+  "Помощник (сервис)",
+  "Гость",
+  "Сопровождающий",
 ];
 
 const DEFAULT_FILIALS = ["Филиал 1", "Филиал 2"];
@@ -25,8 +30,8 @@ async function main() {
   for (const name of STANDARD_ROLES) {
     await prisma.rol.upsert({
       where: { name },
-      update: {},
-      create: { name },
+      update: { isStandard: true, deletedAt: null },
+      create: { name, isStandard: true },
     });
   }
 

@@ -69,10 +69,13 @@ model Stolik {
 // при выборе "другое" и вводе нового значения роль автоматически добавляется
 // в этот список и дальше предлагается всем в выпадающем списке.
 model Rol {
-  id        String    @id @default(cuid())
-  name      String    @unique
-  createdAt DateTime  @default(now())
-  deletedAt DateTime?
+  id         String    @id @default(cuid())
+  name       String    @unique
+  // Стандартные роли (из seed.ts) защищены от удаления; роли, добавленные
+  // лидером через "Другое...", можно удалить.
+  isStandard Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
 
   @@map("roli")
 }
