@@ -2,10 +2,15 @@
 
 import { useActionState, useRef, useState } from "react";
 import { createUchastnik, updateUchastnik } from "@/lib/actions/uchastnik";
+import { deleteRol } from "@/lib/actions/rol";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
+
+// Роль участника: стандартные роли (из seed.ts) удалить нельзя, а добавленные
+// лидером — можно прямо здесь, в поле выбора роли.
+export type Role = { id: string; name: string; isStandard: boolean };
 
 const CUSTOM_ROLE_SENTINEL = "__custom__";
 
@@ -20,13 +25,14 @@ export function UchastnikForm({
   mode: "create" | "edit";
   sezonId: string;
   stolikId: string | null;
-  roles: string[];
+  roles: Role[];
   defaultValues?: { id: string; name: string; roleName: string; note: string | null };
   onDone?: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
-  const defaultRoleIsCustom = defaultValues ? !roles.includes(defaultValues.roleName) : false;
+  const defaultRoleIsCustom = defaultValues ? !roles.some((r) => r.name === defaultValues.roleName) : false;
   const [showCustomRole, setShowCustomRole] = useState(defaultRoleIsCustom);
+  const [deletingRoleId, setDeletingRoleId] = useState<string | null>(null);
   const storageKey =
     mode === "create" ? `draft:uchastnik:create:${sezonId}:${stolikId ?? "none"}` : `draft:uchastnik:edit:${defaultValues!.id}`;
   useDraftAutosave(storageKey, formRef);
@@ -41,6 +47,16 @@ export function UchastnikForm({
     }
     return result;
   }, null);
+
+  // Роли, добавленные лидером, — их можно удалить (стандартные защищены).
+  const deletableRoles = roles.filter((r) => !r.isStandard);
+
+  async function handleDeleteRole(role: Role) {
+    if (!confirm(`Удалить роль «${role.name}»? Она пропадёт из списка у всех участников во всех сезонах.`)) return;
+    setDeletingRoleId(role.id);
+    await deleteRol(role.id);
+    setDeletingRoleId(null);
+  }
 
   return (
     <form ref={formRef} action={formAction} className="space-y-3">
@@ -71,8 +87,8 @@ export function UchastnikForm({
             Выберите роль
           </option>
           {roles.map((role) => (
-            <option key={role} value={role}>
-              {role}
+            <option key={role.id} value={role.name}>
+              {role.name}
             </option>
           ))}
           <option value={CUSTOM_ROLE_SENTINEL}>Другое...</option>
@@ -82,9 +98,34 @@ export function UchastnikForm({
             type="text"
             name="roleCustom"
             defaultValue={defaultRoleIsCustom ? defaultValues?.roleName : ""}
-            placeholder="Впишите роль"
+            placeholder="Впишите роль — она добавится в список для всех"
             className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
           />
+        )}
+
+        {deletableRoles.length > 0 && (
+          <div className="mt-2">
+            <p className="mb-1 text-xs text-gray-400">Добавленные роли (нажмите ×, чтобы удалить у всех):</p>
+            <div className="flex flex-wrap gap-1.5">
+              {deletableRoles.map((role) => (
+                <span
+                  key={role.id}
+                  className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-600"
+                >
+                  {role.name}
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteRole(role)}
+                    disabled={deletingRoleId === role.id}
+                    aria-label={`Удалить роль ${role.name}`}
+                    className="text-gray-400 transition-colors hover:text-red-600 disabled:opacity-50"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 

@@ -8,7 +8,7 @@ import { FormError } from "@/components/FormError";
 import { DeleteButton } from "@/components/DeleteButton";
 import { ToggleSection } from "@/components/ToggleSection";
 import { ParticipantRow } from "@/components/ParticipantRow";
-import { UchastnikForm } from "@/components/UchastnikForm";
+import { UchastnikForm, type Role } from "@/components/UchastnikForm";
 
 type Participant = { id: string; name: string; roleName: string; note: string | null };
 
@@ -23,7 +23,7 @@ export function StolikCard({
   sezonId: string;
   stolik: { id: string; name: string };
   participants: Participant[];
-  roles: string[];
+  roles: Role[];
   deleteStolikAction: () => Promise<void>;
   deleteParticipantActions: Record<string, () => Promise<void>>;
 }) {

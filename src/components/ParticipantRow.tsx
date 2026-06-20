@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DeleteButton } from "@/components/DeleteButton";
-import { UchastnikForm } from "@/components/UchastnikForm";
+import { UchastnikForm, type Role } from "@/components/UchastnikForm";
 
 export function ParticipantRow({
   sezonId,
@@ -13,7 +13,7 @@ export function ParticipantRow({
 }: {
   sezonId: string;
   stolikId: string | null;
-  roles: string[];
+  roles: Role[];
   participant: { id: string; name: string; roleName: string; note: string | null };
   deleteAction: () => Promise<void>;
 }) {

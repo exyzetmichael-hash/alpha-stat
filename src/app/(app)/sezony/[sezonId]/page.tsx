@@ -60,9 +60,12 @@ export default async function SezonDetailPage({
 
   if (!sezon) notFound();
 
-  const roles = (await prisma.rol.findMany({ where: { deletedAt: null }, orderBy: { name: "asc" } })).map(
-    (r) => r.name
-  );
+  const roles = (
+    await prisma.rol.findMany({
+      where: { deletedAt: null },
+      orderBy: [{ isStandard: "desc" }, { name: "asc" }],
+    })
+  ).map((r) => ({ id: r.id, name: r.name, isStandard: r.isStandard }));
 
   const budjetKategorii = await prisma.budjetKategoriya.findMany({
     where: { deletedAt: null },
