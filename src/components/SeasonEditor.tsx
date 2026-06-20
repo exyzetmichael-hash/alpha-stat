@@ -5,6 +5,8 @@ import { updateSezon } from "@/lib/actions/sezon";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { EditSwap } from "@/components/motion/EditSwap";
+import { EditButton } from "@/components/motion/EditButton";
 import { SEZON_STATUS_LABELS, type SezonStatus } from "@/lib/season-status";
 import { formatDateRu } from "@/lib/format-date";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
@@ -50,9 +52,11 @@ export function SeasonEditor({
     return result;
   }, null);
 
-  if (!editing) {
-    return (
-      <div className="space-y-2">
+  return (
+    <EditSwap
+      editing={editing}
+      view={
+        <div className="space-y-2">
         <div className="flex items-center gap-2">
           <h1 className="text-2xl font-bold text-[#1a1a1a]">{sezon.name}</h1>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE_CLASS[status]}`}>
@@ -82,19 +86,11 @@ export function SeasonEditor({
             <p className="whitespace-pre-wrap text-sm text-gray-600">{sezon.nextSeasonNote}</p>
           </div>
         )}
-        <button
-          type="button"
-          onClick={() => setEditing(true)}
-          className="rounded-lg px-1.5 py-1 text-sm font-medium text-gray-400 transition-colors hover:text-gray-700"
-        >
-          Изменить сезон
-        </button>
+        <EditButton onClick={() => setEditing(true)} label="Изменить сезон" />
       </div>
-    );
-  }
-
-  return (
-    <form ref={formRef} action={formAction} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
+      }
+      edit={
+        <form ref={formRef} action={formAction} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
       <input type="hidden" name="id" value={sezon.id} />
       <input type="hidden" name="filialId" value={filialId} />
 
@@ -184,5 +180,7 @@ export function SeasonEditor({
         </button>
       </div>
     </form>
+      }
+    />
   );
 }

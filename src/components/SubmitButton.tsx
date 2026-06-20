@@ -1,6 +1,8 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
+import { motion } from "motion/react";
+import { SPRING } from "@/components/motion/transitions";
 
 export function SubmitButton({
   children,
@@ -14,12 +16,15 @@ export function SubmitButton({
   const { pending } = useFormStatus();
 
   return (
-    <button
+    <motion.button
       type="submit"
       disabled={pending}
-      className={`rounded-xl bg-[#E63946] px-4 py-2.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 ${className}`}
+      whileHover={pending ? undefined : { scale: 1.03 }}
+      whileTap={pending ? undefined : { scale: 0.96 }}
+      transition={SPRING}
+      className={`rounded-xl bg-[#E63946] px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-50 ${className}`}
     >
       {pending ? pendingLabel : children}
-    </button>
+    </motion.button>
   );
 }

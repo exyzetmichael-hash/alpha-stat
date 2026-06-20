@@ -2,6 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { AnimatePresence, motion } from "motion/react";
+import { EASE_OUT, SPRING } from "@/components/motion/transitions";
 
 function LoginForm() {
   const router = useRouter();
@@ -40,7 +42,12 @@ function LoginForm() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+      <motion.div
+        className="w-full max-w-sm"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: EASE_OUT }}
+      >
         <h1 className="mb-1 text-center text-2xl font-bold text-[#1a1a1a]">
           Сезоны
         </h1>
@@ -66,21 +73,34 @@ function LoginForm() {
             />
           </div>
 
-          {status === "error" && (
-            <p className="text-sm text-red-600" role="alert">
-              {errorMessage}
-            </p>
-          )}
+          <AnimatePresence initial={false}>
+            {status === "error" && (
+              <motion.p
+                key={errorMessage}
+                role="alert"
+                initial={{ opacity: 0, height: 0, y: -4 }}
+                animate={{ opacity: 1, height: "auto", y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -4 }}
+                transition={{ duration: 0.2, ease: EASE_OUT }}
+                className="overflow-hidden text-sm text-red-600"
+              >
+                {errorMessage}
+              </motion.p>
+            )}
+          </AnimatePresence>
 
-          <button
+          <motion.button
             type="submit"
             disabled={status === "loading" || password.length === 0}
-            className="w-full rounded-xl bg-[#E63946] py-3 text-base font-semibold text-white transition active:scale-[0.99] disabled:opacity-50"
+            whileHover={status === "loading" || password.length === 0 ? undefined : { scale: 1.02 }}
+            whileTap={status === "loading" || password.length === 0 ? undefined : { scale: 0.98 }}
+            transition={SPRING}
+            className="w-full rounded-xl bg-[#E63946] py-3 text-base font-semibold text-white disabled:opacity-50"
           >
             {status === "loading" ? "Входим..." : "Войти"}
-          </button>
+          </motion.button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }
