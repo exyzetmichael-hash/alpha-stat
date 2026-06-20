@@ -9,6 +9,8 @@ import { softDeleteBudjetZapis } from "@/lib/actions/budjet";
 import { softDeleteReklama } from "@/lib/actions/reklama";
 import { softDeleteVypusknik } from "@/lib/actions/vypusknik";
 import { softDeleteZametka } from "@/lib/actions/zametka";
+import { softDeleteSezonAndGoToFilial } from "@/lib/actions/sezon";
+import { DeleteButton } from "@/components/DeleteButton";
 import { SeasonEditor } from "@/components/SeasonEditor";
 import { StolikCard } from "@/components/StolikCard";
 import { CreateStolikForm } from "@/components/CreateStolikForm";
@@ -247,6 +249,14 @@ export default async function SezonDetailPage({
           <ZametkaForm mode="create" sezonId={sezon.id} />
         </ToggleSection>
       </section>
+
+      <div className="border-t border-gray-200 pt-4">
+        <DeleteButton
+          action={softDeleteSezonAndGoToFilial.bind(null, sezon.id, sezon.filialId)}
+          confirmText={`Удалить сезон «${sezon.name}» со всем его содержимым? Его можно будет восстановить в Корзине.`}
+          label="Удалить сезон"
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import type { ActionState } from "./filial";
 
@@ -74,4 +75,14 @@ export async function restoreSezon(id: string, filialId: string): Promise<void> 
   await prisma.sezon.update({ where: { id }, data: { deletedAt: null } });
   revalidatePath(`/filials/${filialId}`);
   revalidatePath("/trash");
+}
+
+// Удаление со страницы самого сезона: после удаления возвращаем
+// пользователя к странице филиала, иначе он остался бы на странице
+// удалённой записи.
+export async function softDeleteSezonAndGoToFilial(id: string, filialId: string): Promise<void> {
+  await prisma.sezon.update({ where: { id }, data: { deletedAt: new Date() } });
+  revalidatePath(`/filials/${filialId}`);
+  revalidatePath("/trash");
+  redirect(`/filials/${filialId}`);
 }

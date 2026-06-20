@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/LogoutButton";
+import { ReportErrorButton } from "@/components/ReportErrorButton";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,6 +28,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6">{children}</main>
+      <footer className="mx-auto w-full max-w-3xl px-4 py-6 text-center">
+        <ReportErrorButton />
+      </footer>
     </div>
   );
 }
