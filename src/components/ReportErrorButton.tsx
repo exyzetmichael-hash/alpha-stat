@@ -49,7 +49,7 @@ export function ReportErrorButton() {
           transition={SPRING}
           className="text-sm text-gray-400 underline-offset-2 transition-colors hover:text-[#E63946] hover:underline"
         >
-          Сообщить об ошибке
+          Обратная связь
         </motion.button>
       ) : (
         <motion.div
@@ -84,11 +84,11 @@ export function ReportErrorButton() {
                 transition={{ duration: 0.18, ease: EASE_OUT }}
                 className="space-y-2"
               >
-                <label className="block text-sm font-medium text-gray-700">Что случилось?</label>
+                <label className="block text-sm font-medium text-gray-700">Что хотите рассказать?</label>
                 <textarea
                   name="message"
                   rows={3}
-                  placeholder="Опишите проблему: что вы делали и что пошло не так"
+                  placeholder="Ошибка, идея или пожелание — напишите, что у вас на уме"
                   className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
                 />
                 <input type="hidden" name="pageUrl" value={pathname} />

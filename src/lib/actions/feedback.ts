@@ -2,7 +2,7 @@
 
 import type { ActionState } from "./filial";
 
-// Отправка сообщения об ошибке от пользователя администратору в Telegram.
+// Отправка обратной связи от пользователя администратору в Telegram.
 // Нужны две переменные окружения (см. .env.example и DEPLOY.md):
 //   TELEGRAM_BOT_TOKEN — токен бота от @BotFather
 //   TELEGRAM_CHAT_ID   — id чата администратора, куда слать сообщения
@@ -14,7 +14,7 @@ export async function sendErrorReport(
   const pageUrl = String(formData.get("pageUrl") ?? "").trim();
 
   if (!message) {
-    return { error: "Опишите, что случилось" };
+    return { error: "Напишите, что хотите рассказать" };
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -27,7 +27,7 @@ export async function sendErrorReport(
   }
 
   const text = [
-    "🐞 Сообщение об ошибке в сервисе «Сезоны»",
+    "📩 Обратная связь из сервиса «Сезоны»",
     "",
     message,
     pageUrl ? `\nСтраница: ${pageUrl}` : "",
