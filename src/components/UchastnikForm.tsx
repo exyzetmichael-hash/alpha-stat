@@ -9,10 +9,9 @@ import { FormError } from "@/components/FormError";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 // Роль участника: стандартные роли (из seed.ts) удалить нельзя, а добавленные
-// лидером — можно прямо здесь, в поле выбора роли.
+// лидером — можно прямо здесь, в поле выбора роли. У участника может быть
+// несколько ролей — поэтому выбор через чекбоксы.
 export type Role = { id: string; name: string; isStandard: boolean };
-
-const CUSTOM_ROLE_SENTINEL = "__custom__";
 
 export function UchastnikForm({
   mode,
@@ -26,13 +25,18 @@ export function UchastnikForm({
   sezonId: string;
   stolikId: string | null;
   roles: Role[];
-  defaultValues?: { id: string; name: string; roleName: string; note: string | null };
+  defaultValues?: { id: string; name: string; roleNames: string[]; note: string | null };
   onDone?: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
-  const defaultRoleIsCustom = defaultValues ? !roles.some((r) => r.name === defaultValues.roleName) : false;
-  const [showCustomRole, setShowCustomRole] = useState(defaultRoleIsCustom);
   const [deletingRoleId, setDeletingRoleId] = useState<string | null>(null);
+  // Роли, которые лидер ввёл прямо сейчас и которых ещё нет в справочнике:
+  // показываем их как отмеченные чекбоксы, а на сохранении действие заведёт их.
+  const knownNames = roles.map((r) => r.name);
+  const [addedRoles, setAddedRoles] = useState<string[]>(
+    () => (defaultValues?.roleNames ?? []).filter((name) => !knownNames.includes(name))
+  );
+  const [customInput, setCustomInput] = useState("");
   const storageKey =
     mode === "create" ? `draft:uchastnik:create:${sezonId}:${stolikId ?? "none"}` : `draft:uchastnik:edit:${defaultValues!.id}`;
   useDraftAutosave(storageKey, formRef);
@@ -41,7 +45,11 @@ export function UchastnikForm({
   const [state, formAction] = useActionState<ActionState, FormData>(async (prevState, formData) => {
     const result = await action(prevState, formData);
     if (!result) {
-      if (mode === "create") formRef.current?.reset();
+      if (mode === "create") {
+        formRef.current?.reset();
+        setAddedRoles([]);
+        setCustomInput("");
+      }
       clearDraft(storageKey);
       onDone?.();
     }
@@ -50,12 +58,23 @@ export function UchastnikForm({
 
   // Роли, добавленные лидером, — их можно удалить (стандартные защищены).
   const deletableRoles = roles.filter((r) => !r.isStandard);
+  const selectedNames = new Set(defaultValues?.roleNames ?? []);
 
   async function handleDeleteRole(role: Role) {
     if (!confirm(`Удалить роль «${role.name}»? Она пропадёт из списка у всех участников во всех сезонах.`)) return;
     setDeletingRoleId(role.id);
     await deleteRol(role.id);
     setDeletingRoleId(null);
+  }
+
+  function handleAddCustomRole() {
+    const name = customInput.trim();
+    if (!name) return;
+    const exists =
+      knownNames.some((n) => n.toLowerCase() === name.toLowerCase()) ||
+      addedRoles.some((n) => n.toLowerCase() === name.toLowerCase());
+    if (!exists) setAddedRoles((prev) => [...prev, name]);
+    setCustomInput("");
   }
 
   return (
@@ -75,33 +94,63 @@ export function UchastnikForm({
         />
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Роль</label>
-        <select
-          name="roleSelect"
-          defaultValue={defaultRoleIsCustom ? CUSTOM_ROLE_SENTINEL : defaultValues?.roleName ?? ""}
-          onChange={(e) => setShowCustomRole(e.target.value === CUSTOM_ROLE_SENTINEL)}
-          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
-        >
-          <option value="" disabled>
-            Выберите роль
-          </option>
+      <fieldset>
+        <legend className="mb-1.5 block text-sm font-medium text-gray-700">Роли (можно несколько)</legend>
+        <div className="flex flex-wrap gap-1.5">
           {roles.map((role) => (
-            <option key={role.id} value={role.name}>
+            <label
+              key={role.id}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
+            >
+              <input
+                type="checkbox"
+                name="roleNames"
+                value={role.name}
+                defaultChecked={selectedNames.has(role.name)}
+                className="h-3.5 w-3.5 accent-[#E63946]"
+              />
               {role.name}
-            </option>
+            </label>
           ))}
-          <option value={CUSTOM_ROLE_SENTINEL}>Другое...</option>
-        </select>
-        {showCustomRole && (
+          {addedRoles.map((name) => (
+            <label
+              key={`added:${name}`}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
+            >
+              <input
+                type="checkbox"
+                name="roleNames"
+                value={name}
+                defaultChecked
+                className="h-3.5 w-3.5 accent-[#E63946]"
+              />
+              {name}
+            </label>
+          ))}
+        </div>
+
+        <div className="mt-2 flex gap-2">
           <input
             type="text"
-            name="roleCustom"
-            defaultValue={defaultRoleIsCustom ? defaultValues?.roleName : ""}
-            placeholder="Впишите роль — она добавится в список для всех"
-            className="mt-2 w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddCustomRole();
+              }
+            }}
+            placeholder="Своя роль — добавится в список для всех"
+            className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
           />
-        )}
+          <button
+            type="button"
+            onClick={handleAddCustomRole}
+            className="shrink-0 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+          >
+            Добавить
+          </button>
+        </div>
 
         {deletableRoles.length > 0 && (
           <div className="mt-2">
@@ -127,7 +176,7 @@ export function UchastnikForm({
             </div>
           </div>
         )}
-      </div>
+      </fieldset>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Примечание (необязательно)</label>

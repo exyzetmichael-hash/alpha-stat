@@ -16,7 +16,7 @@ export function ParticipantRow({
   sezonId: string;
   stolikId: string | null;
   roles: Role[];
-  participant: { id: string; name: string; roleName: string; note: string | null };
+  participant: { id: string; name: string; roleNames: string[]; note: string | null };
   deleteAction: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
@@ -41,7 +41,9 @@ export function ParticipantRow({
           <div>
             <p className="text-sm font-medium text-[#1a1a1a]">
               {participant.name}{" "}
-              <span className="font-normal text-gray-500">— {participant.roleName}</span>
+              {participant.roleNames.length > 0 && (
+                <span className="font-normal text-gray-500">— {participant.roleNames.join(", ")}</span>
+              )}
             </p>
             {participant.note && <p className="text-sm text-gray-500">{participant.note}</p>}
           </div>

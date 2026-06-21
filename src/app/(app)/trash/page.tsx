@@ -166,7 +166,7 @@ export default async function TrashPage() {
           {uchastniki.map((u) => (
             <TrashRow
               key={u.id}
-              title={`${u.name} — ${u.roleName}`}
+              title={u.roleNames.length > 0 ? `${u.name} — ${u.roleNames.join(", ")}` : u.name}
               subtitle={`${u.sezon.filial.name} · ${u.sezon.name}${u.stolik ? ` · ${u.stolik.name}` : ""}`}
               action={restoreUchastnik.bind(null, u.id, u.sezonId)}
             />

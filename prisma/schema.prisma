@@ -95,9 +95,9 @@ model Uchastnik {
   stolikId String?
   stolik   Stolik? @relation(fields: [stolikId], references: [id])
 
-  name     String
-  roleName String
-  note     String?
+  name      String
+  roleNames String[] // у участника может быть несколько ролей
+  note      String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

@@ -4,30 +4,34 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import type { ActionState } from "./filial";
 
-const CUSTOM_ROLE_SENTINEL = "__custom__";
+// Роли участника приходят как набор отмеченных чекбоксов (можно несколько).
+// Любая роль, которой ещё нет в справочнике (добавленная лидером прямо в форме),
+// заводится автоматически в области текущего контекста: за столиком или
+// в команде вне столиков. Порядок и дубли убираем.
+async function resolveRoleNames(formData: FormData, stolikIdRaw: string): Promise<string[]> {
+  const names = Array.from(
+    new Set(
+      formData
+        .getAll("roleNames")
+        .map((value) => String(value).trim())
+        .filter((value) => value.length > 0)
+    )
+  );
 
-async function resolveRoleName(formData: FormData): Promise<string | null> {
-  const roleSelect = String(formData.get("roleSelect") ?? "").trim();
-  if (!roleSelect) return null;
+  if (names.length === 0) return names;
 
-  if (roleSelect !== CUSTOM_ROLE_SENTINEL) {
-    return roleSelect;
-  }
+  const scope = stolikIdRaw ? "STOLIK" : "KOMANDA";
+  await Promise.all(
+    names.map((name) =>
+      prisma.rol.upsert({
+        where: { name },
+        update: {},
+        create: { name, scope },
+      })
+    )
+  );
 
-  const customRole = String(formData.get("roleCustom") ?? "").trim();
-  if (!customRole) return null;
-
-  // Новая роль попадает в тот список, где её добавили: за столиком или
-  // в команде вне столиков. Если роль с таким именем уже есть — оставляем
-  // её область как есть.
-  const scope = String(formData.get("stolikId") ?? "").trim() ? "STOLIK" : "KOMANDA";
-  await prisma.rol.upsert({
-    where: { name: customRole },
-    update: {},
-    create: { name: customRole, scope },
-  });
-
-  return customRole;
+  return names;
 }
 
 export async function createUchastnik(_prevState: ActionState, formData: FormData): Promise<ActionState> {
@@ -35,17 +39,17 @@ export async function createUchastnik(_prevState: ActionState, formData: FormDat
   const stolikIdRaw = String(formData.get("stolikId") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
-  const roleName = await resolveRoleName(formData);
+  const roleNames = await resolveRoleNames(formData, stolikIdRaw);
 
   if (!name) return { error: "Введите имя участника" };
-  if (!roleName) return { error: "Выберите роль участника" };
+  if (roleNames.length === 0) return { error: "Выберите хотя бы одну роль" };
 
   await prisma.uchastnik.create({
     data: {
       sezonId,
       stolikId: stolikIdRaw || null,
       name,
-      roleName,
+      roleNames,
       note: note || null,
     },
   });
@@ -60,17 +64,17 @@ export async function updateUchastnik(_prevState: ActionState, formData: FormDat
   const stolikIdRaw = String(formData.get("stolikId") ?? "").trim();
   const name = String(formData.get("name") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
-  const roleName = await resolveRoleName(formData);
+  const roleNames = await resolveRoleNames(formData, stolikIdRaw);
 
   if (!name) return { error: "Введите имя участника" };
-  if (!roleName) return { error: "Выберите роль участника" };
+  if (roleNames.length === 0) return { error: "Выберите хотя бы одну роль" };
 
   await prisma.uchastnik.update({
     where: { id },
     data: {
       stolikId: stolikIdRaw || null,
       name,
-      roleName,
+      roleNames,
       note: note || null,
     },
   });

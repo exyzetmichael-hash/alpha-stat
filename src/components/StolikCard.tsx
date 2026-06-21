@@ -10,7 +10,7 @@ import { ToggleSection } from "@/components/ToggleSection";
 import { ParticipantRow } from "@/components/ParticipantRow";
 import { UchastnikForm, type Role } from "@/components/UchastnikForm";
 
-type Participant = { id: string; name: string; roleName: string; note: string | null };
+type Participant = { id: string; name: string; roleNames: string[]; note: string | null };
 
 export function StolikCard({
   sezonId,
