@@ -6,6 +6,16 @@ function isDraftField(element: Element): element is DraftField {
   return element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement;
 }
 
+// Черновик хранит только текстовые значения. Чекбоксы/радио пропускаем:
+// их .value не отражает состояние (всегда "on"), а группы с одним именем
+// нельзя восстановить через .value — иначе черновик «залипал» бы как непустой.
+function isRestorableField(element: DraftField): boolean {
+  if (element instanceof HTMLInputElement && (element.type === "hidden" || element.type === "checkbox" || element.type === "radio")) {
+    return false;
+  }
+  return true;
+}
+
 function setNativeValue(element: DraftField, value: string) {
   element.value = value;
   const eventType = element instanceof HTMLSelectElement ? "change" : "input";
@@ -46,7 +56,7 @@ export function useDraftAutosave(
 
     const fill = () => {
       for (const element of Array.from(form.elements)) {
-        if (!isDraftField(element) || element instanceof HTMLInputElement && element.type === "hidden") continue;
+        if (!isDraftField(element) || !isRestorableField(element)) continue;
         if (!element.name || !(element.name in draft)) continue;
         setNativeValue(element, draft[element.name]);
       }
@@ -69,7 +79,7 @@ export function useDraftAutosave(
     const save = () => {
       const data: Record<string, string> = {};
       for (const element of Array.from(form.elements)) {
-        if (!isDraftField(element) || (element instanceof HTMLInputElement && element.type === "hidden")) continue;
+        if (!isDraftField(element) || !isRestorableField(element)) continue;
         if (!element.name) continue;
         data[element.name] = element.value;
       }

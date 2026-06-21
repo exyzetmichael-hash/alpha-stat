@@ -17,10 +17,14 @@ async function resolveRoleName(formData: FormData): Promise<string | null> {
   const customRole = String(formData.get("roleCustom") ?? "").trim();
   if (!customRole) return null;
 
+  // Новая роль попадает в тот список, где её добавили: за столиком или
+  // в команде вне столиков. Если роль с таким именем уже есть — оставляем
+  // её область как есть.
+  const scope = String(formData.get("stolikId") ?? "").trim() ? "STOLIK" : "KOMANDA";
   await prisma.rol.upsert({
     where: { name: customRole },
     update: {},
-    create: { name: customRole },
+    create: { name: customRole, scope },
   });
 
   return customRole;

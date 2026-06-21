@@ -60,12 +60,19 @@ export default async function SezonDetailPage({
 
   if (!sezon) notFound();
 
-  const roles = (
+  // Роли за столиками и роли команды вне столиков — это два разных списка.
+  const allRoles = (
     await prisma.rol.findMany({
       where: { deletedAt: null },
       orderBy: [{ isStandard: "desc" }, { name: "asc" }],
     })
-  ).map((r) => ({ id: r.id, name: r.name, isStandard: r.isStandard }));
+  ).map((r) => ({ id: r.id, name: r.name, isStandard: r.isStandard, scope: r.scope }));
+  const stolikRoles = allRoles
+    .filter((r) => r.scope === "STOLIK")
+    .map((r) => ({ id: r.id, name: r.name, isStandard: r.isStandard }));
+  const komandaRoles = allRoles
+    .filter((r) => r.scope === "KOMANDA")
+    .map((r) => ({ id: r.id, name: r.name, isStandard: r.isStandard }));
 
   const budjetKategorii = await prisma.budjetKategoriya.findMany({
     where: { deletedAt: null },
@@ -100,7 +107,7 @@ export default async function SezonDetailPage({
             sezonId={sezon.id}
             stolik={stolik}
             participants={stolik.uchastniki}
-            roles={roles}
+            roles={stolikRoles}
             deleteStolikAction={softDeleteStolik.bind(null, stolik.id, sezon.id)}
             deleteParticipantActions={Object.fromEntries(
               stolik.uchastniki.map((u) => [u.id, softDeleteUchastnik.bind(null, u.id, sezon.id)])
@@ -122,7 +129,7 @@ export default async function SezonDetailPage({
               key={participant.id}
               sezonId={sezon.id}
               stolikId={null}
-              roles={roles}
+              roles={komandaRoles}
               participant={participant}
               deleteAction={softDeleteUchastnik.bind(null, participant.id, sezon.id)}
             />
@@ -130,7 +137,7 @@ export default async function SezonDetailPage({
           {sezon.uchastniki.length === 0 && <p className="py-1 text-sm text-gray-500">Пока никого нет.</p>}
         </div>
         <ToggleSection closedLabel="+ Добавить участника">
-          <UchastnikForm mode="create" sezonId={sezon.id} stolikId={null} roles={roles} />
+          <UchastnikForm mode="create" sezonId={sezon.id} stolikId={null} roles={komandaRoles} />
         </ToggleSection>
       </section>
 

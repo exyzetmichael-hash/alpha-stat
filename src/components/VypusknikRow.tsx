@@ -12,7 +12,7 @@ export function VypusknikRow({
   deleteAction,
 }: {
   sezonId: string;
-  vypusknik: { id: string; name: string; statusRightAfter: string | null; statusSixMonths: string | null };
+  vypusknik: { id: string; name: string; statusRightAfter: string[]; statusSixMonths: string[] };
   deleteAction: () => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
@@ -29,11 +29,11 @@ export function VypusknikRow({
         <div className="flex items-start justify-between gap-3 border-b border-gray-100 py-2 last:border-none">
           <div>
             <p className="text-sm font-medium text-[#1a1a1a]">{vypusknik.name}</p>
-            {vypusknik.statusRightAfter && (
-              <p className="text-sm text-gray-500">Сразу после Альфы: {vypusknik.statusRightAfter}</p>
+            {vypusknik.statusRightAfter.length > 0 && (
+              <p className="text-sm text-gray-500">Сразу после Альфы: {vypusknik.statusRightAfter.join(", ")}</p>
             )}
-            {vypusknik.statusSixMonths && (
-              <p className="text-sm text-gray-500">Через полгода: {vypusknik.statusSixMonths}</p>
+            {vypusknik.statusSixMonths.length > 0 && (
+              <p className="text-sm text-gray-500">Через полгода: {vypusknik.statusSixMonths.join(", ")}</p>
             )}
           </div>
           <div className="flex shrink-0 items-center gap-3">

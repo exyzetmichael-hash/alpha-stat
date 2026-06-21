@@ -4,11 +4,19 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import type { ActionState } from "./filial";
 
+// Статусы приходят как набор отмеченных чекбоксов (можно несколько).
+function readStatuses(formData: FormData, field: string): string[] {
+  return formData
+    .getAll(field)
+    .map((value) => String(value).trim())
+    .filter((value) => value.length > 0);
+}
+
 export async function createVypusknik(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   const sezonId = String(formData.get("sezonId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const statusRightAfter = String(formData.get("statusRightAfter") ?? "").trim();
-  const statusSixMonths = String(formData.get("statusSixMonths") ?? "").trim();
+  const statusRightAfter = readStatuses(formData, "statusRightAfter");
+  const statusSixMonths = readStatuses(formData, "statusSixMonths");
 
   if (!name) return { error: "Введите имя выпускника" };
 
@@ -16,8 +24,8 @@ export async function createVypusknik(_prevState: ActionState, formData: FormDat
     data: {
       sezonId,
       name,
-      statusRightAfter: statusRightAfter || null,
-      statusSixMonths: statusSixMonths || null,
+      statusRightAfter,
+      statusSixMonths,
     },
   });
 
@@ -29,8 +37,8 @@ export async function updateVypusknik(_prevState: ActionState, formData: FormDat
   const id = String(formData.get("id") ?? "");
   const sezonId = String(formData.get("sezonId") ?? "");
   const name = String(formData.get("name") ?? "").trim();
-  const statusRightAfter = String(formData.get("statusRightAfter") ?? "").trim();
-  const statusSixMonths = String(formData.get("statusSixMonths") ?? "").trim();
+  const statusRightAfter = readStatuses(formData, "statusRightAfter");
+  const statusSixMonths = readStatuses(formData, "statusSixMonths");
 
   if (!name) return { error: "Введите имя выпускника" };
 
@@ -38,8 +46,8 @@ export async function updateVypusknik(_prevState: ActionState, formData: FormDat
     where: { id },
     data: {
       name,
-      statusRightAfter: statusRightAfter || null,
-      statusSixMonths: statusSixMonths || null,
+      statusRightAfter,
+      statusSixMonths,
     },
   });
 

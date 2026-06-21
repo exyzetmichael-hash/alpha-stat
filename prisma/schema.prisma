@@ -74,10 +74,18 @@ model Rol {
   // Стандартные роли (из seed.ts) защищены от удаления; роли, добавленные
   // лидером через "Другое...", можно удалить.
   isStandard Boolean   @default(false)
+  // Где роль предлагается: за столиком (STOLIK) или в команде вне столиков
+  // (KOMANDA). Списки ролей в этих двух контекстах разные.
+  scope      RolScope  @default(KOMANDA)
   createdAt  DateTime  @default(now())
   deletedAt  DateTime?
 
   @@map("roli")
+}
+
+enum RolScope {
+  STOLIK
+  KOMANDA
 }
 
 model Uchastnik {
@@ -177,8 +185,8 @@ model Vypusknik {
   sezon   Sezon  @relation(fields: [sezonId], references: [id])
 
   name             String
-  statusRightAfter String? // "сразу после Альфы"
-  statusSixMonths  String? // "через полгода"
+  statusRightAfter String[] // "сразу после Альфы" (можно несколько статусов)
+  statusSixMonths  String[] // "через полгода" (можно несколько статусов)
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

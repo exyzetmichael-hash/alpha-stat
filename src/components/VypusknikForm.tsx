@@ -6,6 +6,38 @@ import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
+import { VYPUSKNIK_STATUSES } from "@/lib/vypusknik-statuses";
+
+// Группа чекбоксов статусов. Помимо стандартного списка показываем уже
+// сохранённые «нестандартные» значения (например, введённые до перехода
+// на списки), чтобы их можно было снять, а не потерять молча.
+function StatusCheckboxes({ name, label, selected }: { name: string; label: string; selected: string[] }) {
+  const extras = selected.filter((s) => !VYPUSKNIK_STATUSES.includes(s as (typeof VYPUSKNIK_STATUSES)[number]));
+  const options = [...VYPUSKNIK_STATUSES, ...extras];
+
+  return (
+    <fieldset>
+      <legend className="mb-1.5 block text-sm font-medium text-gray-700">{label}</legend>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((status) => (
+          <label
+            key={status}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
+          >
+            <input
+              type="checkbox"
+              name={name}
+              value={status}
+              defaultChecked={selected.includes(status)}
+              className="h-3.5 w-3.5 accent-[#E63946]"
+            />
+            {status}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
 
 export function VypusknikForm({
   mode,
@@ -15,7 +47,7 @@ export function VypusknikForm({
 }: {
   mode: "create" | "edit";
   sezonId: string;
-  defaultValues?: { id: string; name: string; statusRightAfter: string | null; statusSixMonths: string | null };
+  defaultValues?: { id: string; name: string; statusRightAfter: string[]; statusSixMonths: string[] };
   onDone?: () => void;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -49,25 +81,17 @@ export function VypusknikForm({
         />
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Статус сразу после Альфы (необязательно)</label>
-        <input
-          type="text"
-          name="statusRightAfter"
-          defaultValue={defaultValues?.statusRightAfter ?? ""}
-          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
-        />
-      </div>
+      <StatusCheckboxes
+        name="statusRightAfter"
+        label="Статус сразу после Альфы (можно несколько, необязательно)"
+        selected={defaultValues?.statusRightAfter ?? []}
+      />
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Статус через полгода (необязательно)</label>
-        <input
-          type="text"
-          name="statusSixMonths"
-          defaultValue={defaultValues?.statusSixMonths ?? ""}
-          className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
-        />
-      </div>
+      <StatusCheckboxes
+        name="statusSixMonths"
+        label="Статус через полгода (можно несколько, необязательно)"
+        selected={defaultValues?.statusSixMonths ?? []}
+      />
 
       <FormError message={state?.error} />
       <div className="flex gap-2">
