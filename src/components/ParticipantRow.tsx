@@ -25,7 +25,7 @@ export function ParticipantRow({
     <EditSwap
       editing={editing}
       edit={
-        <div className="rounded-xl border border-gray-200 p-3">
+        <div className="rounded-2xl border border-gray-200 bg-gray-50/60 p-4">
           <UchastnikForm
             mode="edit"
             sezonId={sezonId}

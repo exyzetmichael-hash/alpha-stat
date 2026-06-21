@@ -5,6 +5,7 @@ import { createVypusknik, updateVypusknik } from "@/lib/actions/vypusknik";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { CheckPill } from "@/components/CheckPill";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 import { VYPUSKNIK_STATUSES } from "@/lib/vypusknik-statuses";
 
@@ -16,23 +17,13 @@ function StatusCheckboxes({ name, label, selected }: { name: string; label: stri
   const options = [...VYPUSKNIK_STATUSES, ...extras];
 
   return (
-    <fieldset>
-      <legend className="mb-1.5 block text-sm font-medium text-gray-700">{label}</legend>
-      <div className="flex flex-wrap gap-1.5">
+    <fieldset className="min-w-0">
+      <legend className="mb-2 block text-sm font-medium text-gray-700">{label}</legend>
+      <div className="flex flex-wrap gap-2">
         {options.map((status) => (
-          <label
-            key={status}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
-          >
-            <input
-              type="checkbox"
-              name={name}
-              value={status}
-              defaultChecked={selected.includes(status)}
-              className="h-3.5 w-3.5 accent-[#E63946]"
-            />
+          <CheckPill key={status} name={name} value={status} defaultChecked={selected.includes(status)}>
             {status}
-          </label>
+          </CheckPill>
         ))}
       </div>
     </fieldset>

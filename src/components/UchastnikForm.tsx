@@ -6,6 +6,7 @@ import { deleteRol } from "@/lib/actions/rol";
 import type { ActionState } from "@/lib/actions/filial";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { CheckPill } from "@/components/CheckPill";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
 // Роль участника: стандартные роли (из seed.ts) удалить нельзя, а добавленные
@@ -94,42 +95,22 @@ export function UchastnikForm({
         />
       </div>
 
-      <fieldset>
-        <legend className="mb-1.5 block text-sm font-medium text-gray-700">Роли (можно несколько)</legend>
-        <div className="flex flex-wrap gap-1.5">
+      <fieldset className="min-w-0">
+        <legend className="mb-2 block text-sm font-medium text-gray-700">Роли (можно несколько)</legend>
+        <div className="flex flex-wrap gap-2">
           {roles.map((role) => (
-            <label
-              key={role.id}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
-            >
-              <input
-                type="checkbox"
-                name="roleNames"
-                value={role.name}
-                defaultChecked={selectedNames.has(role.name)}
-                className="h-3.5 w-3.5 accent-[#E63946]"
-              />
+            <CheckPill key={role.id} name="roleNames" value={role.name} defaultChecked={selectedNames.has(role.name)}>
               {role.name}
-            </label>
+            </CheckPill>
           ))}
           {addedRoles.map((name) => (
-            <label
-              key={`added:${name}`}
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-700 transition-colors has-[:checked]:border-[#E63946] has-[:checked]:bg-[#E63946]/10 has-[:checked]:text-[#E63946]"
-            >
-              <input
-                type="checkbox"
-                name="roleNames"
-                value={name}
-                defaultChecked
-                className="h-3.5 w-3.5 accent-[#E63946]"
-              />
+            <CheckPill key={`added:${name}`} name="roleNames" value={name} defaultChecked>
               {name}
-            </label>
+            </CheckPill>
           ))}
         </div>
 
-        <div className="mt-2 flex gap-2">
+        <div className="mt-2.5 flex gap-2">
           <input
             type="text"
             value={customInput}
@@ -140,26 +121,29 @@ export function UchastnikForm({
                 handleAddCustomRole();
               }
             }}
-            placeholder="Своя роль — добавится в список для всех"
+            placeholder="Своя роль…"
+            aria-label="Добавить свою роль"
             className="min-w-0 flex-1 rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
           />
           <button
             type="button"
             onClick={handleAddCustomRole}
-            className="shrink-0 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50"
+            disabled={!customInput.trim()}
+            className="shrink-0 rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Добавить
           </button>
         </div>
+        <p className="mt-1.5 text-xs text-gray-400">Новая роль появится в списке для всех участников.</p>
 
         {deletableRoles.length > 0 && (
-          <div className="mt-2">
-            <p className="mb-1 text-xs text-gray-400">Добавленные роли (нажмите ×, чтобы удалить у всех):</p>
+          <div className="mt-3 border-t border-gray-100 pt-3">
+            <p className="mb-1.5 text-xs text-gray-400">Добавленные роли — нажмите ×, чтобы удалить у всех:</p>
             <div className="flex flex-wrap gap-1.5">
               {deletableRoles.map((role) => (
                 <span
                   key={role.id}
-                  className="inline-flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-600"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 py-1 pl-2.5 pr-1.5 text-xs text-gray-600"
                 >
                   {role.name}
                   <button
@@ -167,7 +151,7 @@ export function UchastnikForm({
                     onClick={() => handleDeleteRole(role)}
                     disabled={deletingRoleId === role.id}
                     aria-label={`Удалить роль ${role.name}`}
-                    className="text-gray-400 transition-colors hover:text-red-600 disabled:opacity-50"
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-red-100 hover:text-red-600 disabled:opacity-50"
                   >
                     ×
                   </button>
