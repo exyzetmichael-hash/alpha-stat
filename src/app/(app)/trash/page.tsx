@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
-import { restoreFilial } from "@/lib/actions/filial";
-import { restoreSezon } from "@/lib/actions/sezon";
+import { restoreFilial, hardDeleteFilial } from "@/lib/actions/filial";
+import { restoreSezon, hardDeleteSezon } from "@/lib/actions/sezon";
 import { restoreStolik } from "@/lib/actions/stolik";
 import { restoreUchastnik } from "@/lib/actions/uchastnik";
 import { restoreVeha } from "@/lib/actions/veha";
@@ -9,20 +9,42 @@ import { restoreReklama } from "@/lib/actions/reklama";
 import { restoreVypusknik } from "@/lib/actions/vypusknik";
 import { restoreZametka } from "@/lib/actions/zametka";
 import { RestoreButton } from "@/components/RestoreButton";
+import { DeleteButton } from "@/components/DeleteButton";
 import { formatDateRu } from "@/lib/format-date";
 
 // Корзина читает из базы по запросу, а не статически на этапе сборки —
 // иначе сборке нужна живая база данных.
 export const dynamic = "force-dynamic";
 
-function TrashRow({ title, subtitle, action }: { title: string; subtitle?: string; action: () => Promise<void> }) {
+function TrashRow({
+  title,
+  subtitle,
+  action,
+  hardDeleteAction,
+  hardDeleteConfirm,
+}: {
+  title: string;
+  subtitle?: string;
+  action: () => Promise<void>;
+  hardDeleteAction?: () => Promise<void>;
+  hardDeleteConfirm?: string;
+}) {
   return (
     <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
       <div>
         <p className="font-medium text-[#1a1a1a]">{title}</p>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </div>
-      <RestoreButton action={action} />
+      <div className="flex items-center gap-2">
+        <RestoreButton action={action} />
+        {hardDeleteAction && (
+          <DeleteButton
+            action={hardDeleteAction}
+            confirmText={hardDeleteConfirm ?? "Удалить навсегда? Это действие нельзя отменить."}
+            label="Удалить навсегда"
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -97,7 +119,13 @@ export default async function TrashPage() {
         <section className="space-y-2">
           <h2 className="text-sm font-semibold text-gray-700">Филиалы</h2>
           {filials.map((f) => (
-            <TrashRow key={f.id} title={f.name} action={restoreFilial.bind(null, f.id)} />
+            <TrashRow
+              key={f.id}
+              title={f.name}
+              action={restoreFilial.bind(null, f.id)}
+              hardDeleteAction={hardDeleteFilial.bind(null, f.id)}
+              hardDeleteConfirm={`Удалить филиал «${f.name}» навсегда вместе со всеми его сезонами, участниками и бюджетом? Это действие нельзя отменить.`}
+            />
           ))}
         </section>
       )}
@@ -111,6 +139,8 @@ export default async function TrashPage() {
               title={s.name}
               subtitle={s.filial.name}
               action={restoreSezon.bind(null, s.id, s.filialId)}
+              hardDeleteAction={hardDeleteSezon.bind(null, s.id, s.filialId)}
+              hardDeleteConfirm={`Удалить сезон «${s.name}» навсегда вместе со всеми участниками и бюджетом? Это действие нельзя отменить.`}
             />
           ))}
         </section>

@@ -86,3 +86,20 @@ export async function softDeleteSezonAndGoToFilial(id: string, filialId: string)
   revalidatePath("/trash");
   redirect(`/filials/${filialId}`);
 }
+
+// Безвозвратное удаление из корзины: сначала дочерние записи сезона, затем сам сезон.
+export async function hardDeleteSezon(id: string, filialId: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    await tx.uchastnik.deleteMany({ where: { sezonId: id } });
+    await tx.veha.deleteMany({ where: { sezonId: id } });
+    await tx.budjetZapis.deleteMany({ where: { sezonId: id } });
+    await tx.reklama.deleteMany({ where: { sezonId: id } });
+    await tx.vypusknik.deleteMany({ where: { sezonId: id } });
+    await tx.zametka.deleteMany({ where: { sezonId: id } });
+    await tx.stolik.deleteMany({ where: { sezonId: id } });
+    await tx.sezon.delete({ where: { id } });
+  });
+
+  revalidatePath(`/filials/${filialId}`);
+  revalidatePath("/trash");
+}

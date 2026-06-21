@@ -7,10 +7,21 @@ import { StaggerList, StaggerItem } from "@/components/motion/Stagger";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  // Удалённые филиалы и сезоны не каскадируют deletedAt на свои дочерние записи,
+  // поэтому здесь явно проверяем всю цепочку (сезон → филиал), чтобы данные
+  // из корзины не попадали в статистику дашборда.
   const [participantsCount, completedSeasonsCount, budjetSums] = await Promise.all([
-    prisma.uchastnik.count({ where: { deletedAt: null, stolikId: { not: null } } }),
-    prisma.sezon.count({ where: { deletedAt: null, endDate: { lt: new Date() } } }),
-    prisma.budjetZapis.groupBy({ by: ["tip"], where: { deletedAt: null }, _sum: { amount: true } }),
+    prisma.uchastnik.count({
+      where: { deletedAt: null, stolikId: { not: null }, sezon: { deletedAt: null, filial: { deletedAt: null } } },
+    }),
+    prisma.sezon.count({
+      where: { deletedAt: null, endDate: { lt: new Date() }, filial: { deletedAt: null } },
+    }),
+    prisma.budjetZapis.groupBy({
+      by: ["tip"],
+      where: { deletedAt: null, sezon: { deletedAt: null, filial: { deletedAt: null } } },
+      _sum: { amount: true },
+    }),
   ]);
 
   const dohodTotal = budjetSums.find((s) => s.tip === "DOHOD")?._sum.amount ?? 0;

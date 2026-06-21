@@ -51,3 +51,28 @@ export async function softDeleteFilialAndGoToList(id: string): Promise<void> {
   revalidatePath("/trash");
   redirect("/filials");
 }
+
+// Безвозвратное удаление из корзины: филиал не каскадирует deletedAt на свои
+// сезоны, поэтому здесь вручную удаляем все дочерние записи перед самим филиалом.
+export async function hardDeleteFilial(id: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const sezony = await tx.sezon.findMany({ where: { filialId: id }, select: { id: true } });
+    const sezonIds = sezony.map((s) => s.id);
+
+    if (sezonIds.length > 0) {
+      await tx.uchastnik.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.veha.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.budjetZapis.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.reklama.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.vypusknik.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.zametka.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.stolik.deleteMany({ where: { sezonId: { in: sezonIds } } });
+      await tx.sezon.deleteMany({ where: { id: { in: sezonIds } } });
+    }
+
+    await tx.filial.delete({ where: { id } });
+  });
+
+  revalidatePath("/filials");
+  revalidatePath("/trash");
+}
