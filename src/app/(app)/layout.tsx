@@ -1,5 +1,6 @@
 import { LogoutButton } from "@/components/LogoutButton";
 import { ReportErrorButton } from "@/components/ReportErrorButton";
+import { WhatsNewButton } from "@/components/WhatsNewButton";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { NavLink } from "@/components/motion/NavLink";
@@ -36,6 +37,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <footer className="mx-auto w-full max-w-3xl px-4 py-6 text-center">
           <ReportErrorButton />
         </footer>
+        <WhatsNewButton />
       </div>
     </MotionProvider>
   );
