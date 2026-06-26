@@ -57,7 +57,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#1a1a1a]">Дашборд</h1>
+      <h1 className="text-2xl font-bold text-[#241A13]">Дашборд</h1>
       <p className="text-sm text-gray-500">Сводная статистика по всем филиалам и сезонам за всё время.</p>
 
       <StaggerList className="grid grid-cols-2 gap-3">
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
       </StaggerList>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Выпускники по статусам</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Выпускники по статусам</h2>
         {statusRows.length === 0 ? (
           <p className="text-sm text-gray-500">
             {vypusknikiTotal === 0
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
               <tbody>
                 {statusRows.map((row) => (
                   <tr key={row.status} className="border-b border-gray-50 last:border-none">
-                    <td className="px-4 py-2.5 text-[#1a1a1a]">{row.status}</td>
+                    <td className="px-4 py-2.5 text-[#241A13]">{row.status}</td>
                     <td className="px-3 py-2.5 text-right tabular-nums text-gray-700">{row.rightAfter}</td>
                     <td className="px-4 py-2.5 text-right tabular-nums text-gray-700">{row.sixMonths}</td>
                   </tr>

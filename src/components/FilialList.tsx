@@ -32,7 +32,7 @@ export function FilialList({ filials }: { filials: FilialListItem[] }) {
             className="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-4 shadow-sm"
           >
             <Link href={`/filials/${filial.id}`} className="flex-1">
-              <p className="font-semibold text-[#1a1a1a]">{filial.name}</p>
+              <p className="font-semibold text-[#241A13]">{filial.name}</p>
               <p className="text-sm text-gray-500">
                 {filial.sezonCount} {filial.sezonCount === 1 ? "сезон" : "сезонов"}
               </p>

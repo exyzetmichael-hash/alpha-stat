@@ -32,7 +32,7 @@ function TrashRow({
   return (
     <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 py-3">
       <div>
-        <p className="font-medium text-[#1a1a1a]">{title}</p>
+        <p className="font-medium text-[#241A13]">{title}</p>
         {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
       </div>
       <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export default async function TrashPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#1a1a1a]">Корзина</h1>
+      <h1 className="text-2xl font-bold text-[#241A13]">Корзина</h1>
       <p className="text-sm text-gray-500">
         Здесь лежит всё, что было удалено. Ничего не пропадает навсегда — нажмите «Восстановить», чтобы вернуть
         запись.

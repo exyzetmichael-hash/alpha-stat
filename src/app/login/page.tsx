@@ -48,7 +48,7 @@ function LoginForm() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: EASE_OUT }}
       >
-        <h1 className="mb-1 text-center text-2xl font-bold text-[#1a1a1a]">
+        <h1 className="mb-1 text-center text-2xl font-bold text-[#241A13]">
           Сезоны
         </h1>
         <p className="mb-8 text-center text-sm text-gray-500">

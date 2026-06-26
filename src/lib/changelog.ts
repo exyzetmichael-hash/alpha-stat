@@ -9,6 +9,13 @@ export type ChangelogEntry = {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-06-26",
+    dateLabel: "26 июня 2026",
+    items: [
+      "Обновлённый дизайн: тёплая палитра и новый округлый шрифт — сервис стал приятнее и дружелюбнее.",
+    ],
+  },
+  {
     date: "2026-06-21.2",
     dateLabel: "21 июня 2026",
     items: [

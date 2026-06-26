@@ -61,7 +61,7 @@ export function StolikCard({
         </form>
       ) : (
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-semibold text-[#1a1a1a]">{stolik.name}</h3>
+          <h3 className="font-semibold text-[#241A13]">{stolik.name}</h3>
           <div className="flex items-center gap-3">
             <button
               type="button"

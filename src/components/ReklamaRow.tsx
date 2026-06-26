@@ -29,7 +29,7 @@ export function ReklamaRow({
       view={
         <div className="flex items-start justify-between gap-3 border-b border-gray-100 py-2 last:border-none">
           <div>
-            <p className="text-sm font-medium text-[#1a1a1a]">{formatDateRu(zapis.date)}</p>
+            <p className="text-sm font-medium text-[#241A13]">{formatDateRu(zapis.date)}</p>
             <p className="text-sm text-gray-600">{zapis.action}</p>
             {zapis.materialsNote && <p className="text-sm text-gray-500">Материалы: {zapis.materialsNote}</p>}
             {zapis.effectivenessNote && <p className="text-sm text-gray-500">Эффективность: {zapis.effectivenessNote}</p>}

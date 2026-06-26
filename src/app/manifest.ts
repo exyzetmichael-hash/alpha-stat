@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Внутренний сервис учёта сезонов программы НКО",
     start_url: "/",
     display: "standalone",
-    background_color: "#fafafa",
+    background_color: "#f5f0eb",
     theme_color: "#E63946",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

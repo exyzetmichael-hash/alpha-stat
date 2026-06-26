@@ -66,7 +66,7 @@ export function SeasonList({ seasons }: { seasons: SeasonListItem[] }) {
             >
               <Link href={`/sezony/${season.id}`} className="flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="font-semibold text-[#1a1a1a]">{season.name}</p>
+                  <p className="font-semibold text-[#241A13]">{season.name}</p>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE_CLASS[season.status]}`}>
                     {SEZON_STATUS_LABELS[season.status]}
                   </span>

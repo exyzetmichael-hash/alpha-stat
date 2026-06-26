@@ -100,7 +100,7 @@ export default async function SezonDetailPage({
       <SeasonEditor filialId={sezon.filialId} sezon={sezon} status={status} />
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Столики</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Столики</h2>
         {sezon.stoliki.map((stolik) => (
           <StolikCard
             key={stolik.id}
@@ -121,7 +121,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Команда вне столиков</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Команда вне столиков</h2>
         <p className="text-sm text-gray-500">Медиа, кухня, дети, молитва, музыкальное сопровождение и другие роли.</p>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           {sezon.uchastniki.map((participant) => (
@@ -142,7 +142,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Важные вехи / события сезона</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Важные вехи / события сезона</h2>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           {sezon.vehi.map((veha) => (
             <VehaRow key={veha.id} sezonId={sezon.id} veha={veha} deleteAction={softDeleteVeha.bind(null, veha.id, sezon.id)} />
@@ -155,7 +155,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Бюджет</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Бюджет</h2>
 
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-gray-700">
@@ -207,7 +207,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Рекламная кампания</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Рекламная кампания</h2>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           {sezon.reklama.map((zapis) => (
             <ReklamaRow
@@ -225,7 +225,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Выпускники</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Выпускники</h2>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           {sezon.vypuskniki.map((vypusknik) => (
             <VypusknikRow
@@ -243,7 +243,7 @@ export default async function SezonDetailPage({
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#1a1a1a]">Идеи и заметки по событиям</h2>
+        <h2 className="text-lg font-bold text-[#241A13]">Идеи и заметки по событиям</h2>
         <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
           {sezon.zametki.map((zametka) => (
             <ZametkaRow

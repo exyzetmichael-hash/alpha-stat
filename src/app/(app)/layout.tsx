@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen flex-col">
         <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
-            <NavLink href="/filials" className="text-lg font-bold text-[#1a1a1a]">
+            <NavLink href="/filials" className="text-lg font-bold text-[#241A13]">
               Сезоны
             </NavLink>
             <nav className="flex items-center gap-2">

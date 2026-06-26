@@ -107,7 +107,7 @@ export function WhatsNewButton() {
               className="relative flex max-h-[80vh] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-xl"
             >
               <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
-                <h2 className="text-lg font-bold text-[#1a1a1a]">Что нового</h2>
+                <h2 className="text-lg font-bold text-[#241A13]">Что нового</h2>
                 <button
                   type="button"
                   onClick={() => setOpen(false)}

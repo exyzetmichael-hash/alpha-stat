@@ -28,7 +28,7 @@ export function ZametkaRow({
       view={
         <div className="flex items-start justify-between gap-3 border-b border-gray-100 py-2 last:border-none">
           <div>
-            {zametka.details && <p className="text-sm font-medium text-[#1a1a1a]">{zametka.details}</p>}
+            {zametka.details && <p className="text-sm font-medium text-[#241A13]">{zametka.details}</p>}
             {zametka.idea && <p className="text-sm text-gray-500">{zametka.idea}</p>}
           </div>
           <div className="flex shrink-0 items-center gap-3">

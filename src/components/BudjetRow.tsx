@@ -39,7 +39,7 @@ export function BudjetRow({
       view={
         <div className="flex items-start justify-between gap-3 border-b border-gray-100 py-2 last:border-none">
           <div>
-            <p className="text-sm font-medium text-[#1a1a1a]">
+            <p className="text-sm font-medium text-[#241A13]">
               {zapis.categoryName}{" "}
               <span className="font-normal text-gray-500">— {zapis.amount.toLocaleString("ru-RU")} ₽</span>
             </p>

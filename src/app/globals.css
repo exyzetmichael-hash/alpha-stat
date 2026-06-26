@@ -1,15 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafa;
-  --foreground: #1a1a1a;
+  /* Тёплая бежевая основа вместо холодного серого — фон приложения и текст. */
+  --background: #f5f0eb;
+  --foreground: #241a13;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter,
-    "Helvetica Neue", Arial, sans-serif;
+  /* Nunito — округлый дружелюбный шрифт (загружается через next/font, self-hosted). */
+  --font-sans: var(--font-nunito), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Тёплая нейтральная палитра. Переопределяем стандартную серую шкалу Tailwind,
+     чтобы все существующие классы gray-* по всему приложению стали тёплыми
+     без правки каждого компонента. Значения — из дизайн-системы (warm 50–900). */
+  --color-gray-50: #fafaf9;
+  --color-gray-100: #f5f0eb;
+  --color-gray-200: #eae4dc;
+  --color-gray-300: #d5cdc3;
+  --color-gray-400: #b8afa6;
+  --color-gray-500: #8c8079;
+  --color-gray-600: #6b6059;
+  --color-gray-700: #524940;
+  --color-gray-800: #3a312a;
+  --color-gray-900: #241a13;
 }
 
 body {

@@ -28,7 +28,7 @@ export default async function FilialsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-[#1a1a1a]">Филиалы</h1>
+      <h1 className="text-2xl font-bold text-[#241A13]">Филиалы</h1>
 
       <FilialList filials={items} />
 

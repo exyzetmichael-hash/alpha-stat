@@ -58,7 +58,7 @@ export function SeasonEditor({
       view={
         <div className="space-y-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-bold text-[#1a1a1a]">{sezon.name}</h1>
+          <h1 className="text-2xl font-bold text-[#241A13]">{sezon.name}</h1>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE_CLASS[status]}`}>
             {SEZON_STATUS_LABELS[status]}
           </span>

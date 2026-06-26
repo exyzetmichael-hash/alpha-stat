@@ -20,7 +20,7 @@ export function FilialNameEditor({ id, name }: { id: string; name: string }) {
       editing={editing}
       view={
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-[#1a1a1a]">{name}</h1>
+          <h1 className="text-2xl font-bold text-[#241A13]">{name}</h1>
           <EditButton onClick={() => setEditing(true)} label="Переименовать" />
         </div>
       }
