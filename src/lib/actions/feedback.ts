@@ -1,6 +1,12 @@
 "use server";
 
+import { headers } from "next/headers";
 import type { ActionState } from "./filial";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const FEEDBACK_LIMIT = 5;
+const FEEDBACK_WINDOW_MS = 10 * 60 * 1000;
+const MAX_MESSAGE_LENGTH = 2000;
 
 // Отправка обратной связи от пользователя администратору в Telegram.
 // Нужны две переменные окружения (см. .env.example и DEPLOY.md):
@@ -15,6 +21,15 @@ export async function sendErrorReport(
 
   if (!message) {
     return { error: "Напишите, что хотите рассказать" };
+  }
+
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return { error: "Сообщение слишком длинное" };
+  }
+
+  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (!checkRateLimit(`feedback:${ip}`, FEEDBACK_LIMIT, FEEDBACK_WINDOW_MS)) {
+    return { error: "Слишком много сообщений подряд. Попробуйте чуть позже." };
   }
 
   const token = process.env.TELEGRAM_BOT_TOKEN;

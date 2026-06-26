@@ -1,7 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSessionToken, SESSION_COOKIE_MAX_AGE, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
+
+const LOGIN_ATTEMPT_LIMIT = 10;
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+
+  if (!checkRateLimit(`login:${ip}`, LOGIN_ATTEMPT_LIMIT, LOGIN_ATTEMPT_WINDOW_MS)) {
+    return NextResponse.json(
+      { error: "Слишком много попыток. Подождите немного и попробуйте снова." },
+      { status: 429 }
+    );
+  }
+
   const { password } = await request.json();
   const appPassword = process.env.APP_PASSWORD;
 
