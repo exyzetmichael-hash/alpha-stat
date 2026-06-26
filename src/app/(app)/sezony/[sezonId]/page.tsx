@@ -12,6 +12,7 @@ import { softDeleteZametka } from "@/lib/actions/zametka";
 import { softDeleteSezonAndGoToFilial } from "@/lib/actions/sezon";
 import { DeleteButton } from "@/components/DeleteButton";
 import { SeasonEditor } from "@/components/SeasonEditor";
+import { SezonTabs, type SezonTab } from "@/components/SezonTabs";
 import { StolikCard } from "@/components/StolikCard";
 import { CreateStolikForm } from "@/components/CreateStolikForm";
 import { ToggleSection } from "@/components/ToggleSection";
@@ -88,8 +89,202 @@ export default async function SezonDetailPage({
 
   const status = getSezonStatus(sezon.startDate, sezon.endDate);
 
+  const sectionLabel = "text-xs font-bold uppercase tracking-wide text-gray-500";
+
+  const tabs: SezonTab[] = [
+    {
+      id: "stoliki",
+      label: "Столики",
+      content: (
+        <div className="space-y-8">
+          <section className="space-y-3">
+            <p className={sectionLabel}>За столиками</p>
+            {sezon.stoliki.map((stolik) => (
+              <StolikCard
+                key={stolik.id}
+                sezonId={sezon.id}
+                stolik={stolik}
+                participants={stolik.uchastniki}
+                roles={stolikRoles}
+                deleteStolikAction={softDeleteStolik.bind(null, stolik.id, sezon.id)}
+                deleteParticipantActions={Object.fromEntries(
+                  stolik.uchastniki.map((u) => [u.id, softDeleteUchastnik.bind(null, u.id, sezon.id)])
+                )}
+              />
+            ))}
+            {sezon.stoliki.length === 0 && <p className="text-sm text-gray-500">Столиков пока нет.</p>}
+            <ToggleSection closedLabel="+ Добавить столик">
+              <CreateStolikForm sezonId={sezon.id} />
+            </ToggleSection>
+          </section>
+
+          <section className="space-y-3">
+            <p className={sectionLabel}>Команда вне столиков</p>
+            <p className="text-sm text-gray-500">Медиа, кухня, дети, молитва, музыкальное сопровождение и другие роли.</p>
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div className="flex flex-col gap-1">
+                {sezon.uchastniki.map((participant) => (
+                  <ParticipantRow
+                    key={participant.id}
+                    sezonId={sezon.id}
+                    stolikId={null}
+                    roles={komandaRoles}
+                    participant={participant}
+                    deleteAction={softDeleteUchastnik.bind(null, participant.id, sezon.id)}
+                  />
+                ))}
+                {sezon.uchastniki.length === 0 && <p className="py-1 text-sm text-gray-500">Пока никого нет.</p>}
+              </div>
+            </div>
+            <ToggleSection closedLabel="+ Добавить участника">
+              <UchastnikForm mode="create" sezonId={sezon.id} stolikId={null} roles={komandaRoles} />
+            </ToggleSection>
+          </section>
+        </div>
+      ),
+    },
+    {
+      id: "budjet",
+      label: "Бюджет",
+      content: (
+        <section className="space-y-3">
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-700">
+              Расходы <span className="font-normal text-gray-500">— итого {rashodTotal.toLocaleString("ru-RU")} ₽</span>
+            </h3>
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              {rashodZapisi.map((z) => (
+                <BudjetRow
+                  key={z.id}
+                  sezonId={sezon.id}
+                  tip="RASHOD"
+                  categories={rashodCategories}
+                  zapis={z}
+                  deleteAction={softDeleteBudjetZapis.bind(null, z.id, sezon.id)}
+                />
+              ))}
+              {rashodZapisi.length === 0 && <p className="py-1 text-sm text-gray-500">Расходов пока нет.</p>}
+            </div>
+            <ToggleSection closedLabel="+ Добавить расход">
+              <BudjetForm mode="create" sezonId={sezon.id} tip="RASHOD" categories={rashodCategories} />
+            </ToggleSection>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-700">
+              Доходы <span className="font-normal text-gray-500">— итого {dohodTotal.toLocaleString("ru-RU")} ₽</span>
+            </h3>
+            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              {dohodZapisi.map((z) => (
+                <BudjetRow
+                  key={z.id}
+                  sezonId={sezon.id}
+                  tip="DOHOD"
+                  categories={dohodCategories}
+                  zapis={z}
+                  deleteAction={softDeleteBudjetZapis.bind(null, z.id, sezon.id)}
+                />
+              ))}
+              {dohodZapisi.length === 0 && <p className="py-1 text-sm text-gray-500">Доходов пока нет.</p>}
+            </div>
+            <ToggleSection closedLabel="+ Добавить доход">
+              <BudjetForm mode="create" sezonId={sezon.id} tip="DOHOD" categories={dohodCategories} />
+            </ToggleSection>
+          </div>
+
+          <p className="text-sm font-medium text-gray-700">
+            Баланс сезона: {(dohodTotal - rashodTotal).toLocaleString("ru-RU")} ₽
+          </p>
+        </section>
+      ),
+    },
+    {
+      id: "vehi",
+      label: "Вехи",
+      content: (
+        <section className="space-y-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            {sezon.vehi.map((veha) => (
+              <VehaRow key={veha.id} sezonId={sezon.id} veha={veha} deleteAction={softDeleteVeha.bind(null, veha.id, sezon.id)} />
+            ))}
+            {sezon.vehi.length === 0 && <p className="py-1 text-sm text-gray-500">Событий пока нет.</p>}
+          </div>
+          <ToggleSection closedLabel="+ Добавить событие">
+            <VehaForm mode="create" sezonId={sezon.id} />
+          </ToggleSection>
+        </section>
+      ),
+    },
+    {
+      id: "reklama",
+      label: "Реклама",
+      content: (
+        <section className="space-y-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            {sezon.reklama.map((zapis) => (
+              <ReklamaRow
+                key={zapis.id}
+                sezonId={sezon.id}
+                zapis={zapis}
+                deleteAction={softDeleteReklama.bind(null, zapis.id, sezon.id)}
+              />
+            ))}
+            {sezon.reklama.length === 0 && <p className="py-1 text-sm text-gray-500">Записей пока нет.</p>}
+          </div>
+          <ToggleSection closedLabel="+ Добавить запись">
+            <ReklamaForm mode="create" sezonId={sezon.id} />
+          </ToggleSection>
+        </section>
+      ),
+    },
+    {
+      id: "vypuskniki",
+      label: "Выпускники",
+      content: (
+        <section className="space-y-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            {sezon.vypuskniki.map((vypusknik) => (
+              <VypusknikRow
+                key={vypusknik.id}
+                sezonId={sezon.id}
+                vypusknik={vypusknik}
+                deleteAction={softDeleteVypusknik.bind(null, vypusknik.id, sezon.id)}
+              />
+            ))}
+            {sezon.vypuskniki.length === 0 && <p className="py-1 text-sm text-gray-500">Выпускников пока нет.</p>}
+          </div>
+          <ToggleSection closedLabel="+ Добавить выпускника">
+            <VypusknikForm mode="create" sezonId={sezon.id} />
+          </ToggleSection>
+        </section>
+      ),
+    },
+    {
+      id: "idei",
+      label: "Идеи",
+      content: (
+        <section className="space-y-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            {sezon.zametki.map((zametka) => (
+              <ZametkaRow
+                key={zametka.id}
+                sezonId={sezon.id}
+                zametka={zametka}
+                deleteAction={softDeleteZametka.bind(null, zametka.id, sezon.id)}
+              />
+            ))}
+            {sezon.zametki.length === 0 && <p className="py-1 text-sm text-gray-500">Заметок пока нет.</p>}
+          </div>
+          <ToggleSection closedLabel="+ Добавить заметку">
+            <ZametkaForm mode="create" sezonId={sezon.id} />
+          </ToggleSection>
+        </section>
+      ),
+    },
+  ];
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <Link
         href={`/filials/${sezon.filialId}`}
         className="-mx-1.5 -my-1 inline-block rounded-lg px-1.5 py-1 text-sm font-medium text-gray-400 transition-colors hover:text-gray-700"
@@ -99,166 +294,7 @@ export default async function SezonDetailPage({
 
       <SeasonEditor filialId={sezon.filialId} sezon={sezon} status={status} />
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Столики</h2>
-        {sezon.stoliki.map((stolik) => (
-          <StolikCard
-            key={stolik.id}
-            sezonId={sezon.id}
-            stolik={stolik}
-            participants={stolik.uchastniki}
-            roles={stolikRoles}
-            deleteStolikAction={softDeleteStolik.bind(null, stolik.id, sezon.id)}
-            deleteParticipantActions={Object.fromEntries(
-              stolik.uchastniki.map((u) => [u.id, softDeleteUchastnik.bind(null, u.id, sezon.id)])
-            )}
-          />
-        ))}
-        {sezon.stoliki.length === 0 && <p className="text-sm text-gray-500">Столиков пока нет.</p>}
-        <ToggleSection closedLabel="+ Добавить столик">
-          <CreateStolikForm sezonId={sezon.id} />
-        </ToggleSection>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Команда вне столиков</h2>
-        <p className="text-sm text-gray-500">Медиа, кухня, дети, молитва, музыкальное сопровождение и другие роли.</p>
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          {sezon.uchastniki.map((participant) => (
-            <ParticipantRow
-              key={participant.id}
-              sezonId={sezon.id}
-              stolikId={null}
-              roles={komandaRoles}
-              participant={participant}
-              deleteAction={softDeleteUchastnik.bind(null, participant.id, sezon.id)}
-            />
-          ))}
-          {sezon.uchastniki.length === 0 && <p className="py-1 text-sm text-gray-500">Пока никого нет.</p>}
-        </div>
-        <ToggleSection closedLabel="+ Добавить участника">
-          <UchastnikForm mode="create" sezonId={sezon.id} stolikId={null} roles={komandaRoles} />
-        </ToggleSection>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Важные вехи / события сезона</h2>
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          {sezon.vehi.map((veha) => (
-            <VehaRow key={veha.id} sezonId={sezon.id} veha={veha} deleteAction={softDeleteVeha.bind(null, veha.id, sezon.id)} />
-          ))}
-          {sezon.vehi.length === 0 && <p className="py-1 text-sm text-gray-500">Событий пока нет.</p>}
-        </div>
-        <ToggleSection closedLabel="+ Добавить событие">
-          <VehaForm mode="create" sezonId={sezon.id} />
-        </ToggleSection>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Бюджет</h2>
-
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700">
-            Расходы <span className="font-normal text-gray-500">— итого {rashodTotal.toLocaleString("ru-RU")} ₽</span>
-          </h3>
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            {rashodZapisi.map((z) => (
-              <BudjetRow
-                key={z.id}
-                sezonId={sezon.id}
-                tip="RASHOD"
-                categories={rashodCategories}
-                zapis={z}
-                deleteAction={softDeleteBudjetZapis.bind(null, z.id, sezon.id)}
-              />
-            ))}
-            {rashodZapisi.length === 0 && <p className="py-1 text-sm text-gray-500">Расходов пока нет.</p>}
-          </div>
-          <ToggleSection closedLabel="+ Добавить расход">
-            <BudjetForm mode="create" sezonId={sezon.id} tip="RASHOD" categories={rashodCategories} />
-          </ToggleSection>
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700">
-            Доходы <span className="font-normal text-gray-500">— итого {dohodTotal.toLocaleString("ru-RU")} ₽</span>
-          </h3>
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            {dohodZapisi.map((z) => (
-              <BudjetRow
-                key={z.id}
-                sezonId={sezon.id}
-                tip="DOHOD"
-                categories={dohodCategories}
-                zapis={z}
-                deleteAction={softDeleteBudjetZapis.bind(null, z.id, sezon.id)}
-              />
-            ))}
-            {dohodZapisi.length === 0 && <p className="py-1 text-sm text-gray-500">Доходов пока нет.</p>}
-          </div>
-          <ToggleSection closedLabel="+ Добавить доход">
-            <BudjetForm mode="create" sezonId={sezon.id} tip="DOHOD" categories={dohodCategories} />
-          </ToggleSection>
-        </div>
-
-        <p className="text-sm font-medium text-gray-700">
-          Баланс сезона: {(dohodTotal - rashodTotal).toLocaleString("ru-RU")} ₽
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Рекламная кампания</h2>
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          {sezon.reklama.map((zapis) => (
-            <ReklamaRow
-              key={zapis.id}
-              sezonId={sezon.id}
-              zapis={zapis}
-              deleteAction={softDeleteReklama.bind(null, zapis.id, sezon.id)}
-            />
-          ))}
-          {sezon.reklama.length === 0 && <p className="py-1 text-sm text-gray-500">Записей пока нет.</p>}
-        </div>
-        <ToggleSection closedLabel="+ Добавить запись">
-          <ReklamaForm mode="create" sezonId={sezon.id} />
-        </ToggleSection>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Выпускники</h2>
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          {sezon.vypuskniki.map((vypusknik) => (
-            <VypusknikRow
-              key={vypusknik.id}
-              sezonId={sezon.id}
-              vypusknik={vypusknik}
-              deleteAction={softDeleteVypusknik.bind(null, vypusknik.id, sezon.id)}
-            />
-          ))}
-          {sezon.vypuskniki.length === 0 && <p className="py-1 text-sm text-gray-500">Выпускников пока нет.</p>}
-        </div>
-        <ToggleSection closedLabel="+ Добавить выпускника">
-          <VypusknikForm mode="create" sezonId={sezon.id} />
-        </ToggleSection>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-[#241A13]">Идеи и заметки по событиям</h2>
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-          {sezon.zametki.map((zametka) => (
-            <ZametkaRow
-              key={zametka.id}
-              sezonId={sezon.id}
-              zametka={zametka}
-              deleteAction={softDeleteZametka.bind(null, zametka.id, sezon.id)}
-            />
-          ))}
-          {sezon.zametki.length === 0 && <p className="py-1 text-sm text-gray-500">Заметок пока нет.</p>}
-        </div>
-        <ToggleSection closedLabel="+ Добавить заметку">
-          <ZametkaForm mode="create" sezonId={sezon.id} />
-        </ToggleSection>
-      </section>
+      <SezonTabs tabs={tabs} />
 
       <div className="border-t border-gray-200 pt-4">
         <DeleteButton

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { DeleteButton } from "@/components/DeleteButton";
 import { UchastnikForm, type Role } from "@/components/UchastnikForm";
+import { Avatar } from "@/components/Avatar";
+import { RoleBadge } from "@/components/RoleBadge";
 import { EditSwap } from "@/components/motion/EditSwap";
 import { EditButton } from "@/components/motion/EditButton";
 
@@ -37,17 +39,20 @@ export function ParticipantRow({
         </div>
       }
       view={
-        <div className="flex items-start justify-between gap-3 border-b border-gray-100 py-2 last:border-none">
-          <div>
-            <p className="text-sm font-medium text-[#241A13]">
-              {participant.name}{" "}
-              {participant.roleNames.length > 0 && (
-                <span className="font-normal text-gray-500">— {participant.roleNames.join(", ")}</span>
-              )}
-            </p>
-            {participant.note && <p className="text-sm text-gray-500">{participant.note}</p>}
+        <div className="flex items-start gap-3 py-2">
+          <Avatar name={participant.name} />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-[#241A13]">{participant.name}</p>
+            {participant.roleNames.length > 0 && (
+              <div className="mt-1 flex flex-wrap gap-1.5">
+                {participant.roleNames.map((role) => (
+                  <RoleBadge key={role} name={role} />
+                ))}
+              </div>
+            )}
+            {participant.note && <p className="mt-1 text-sm text-gray-500">{participant.note}</p>}
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <EditButton onClick={() => setEditing(true)} />
             <DeleteButton
               action={deleteAction}
