@@ -16,6 +16,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </NavLink>
             <nav className="flex items-center gap-2">
               <NavLink
+                href="/search"
+                className="rounded-lg px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
+              >
+                Поиск
+              </NavLink>
+              <NavLink
                 href="/dashboard"
                 className="rounded-lg px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:text-gray-800"
               >

@@ -18,6 +18,7 @@ export async function createSezon(_prevState: ActionState, formData: FormData): 
   const theme = String(formData.get("theme") ?? "").trim();
   const startDate = parseDateInput(formData.get("startDate"));
   const endDate = parseDateInput(formData.get("endDate"));
+  const copyFromSezonId = String(formData.get("copyFromSezonId") ?? "").trim();
 
   if (!name) return { error: "Введите название сезона" };
   if (!startDate || !endDate) return { error: "Укажите дату начала и дату окончания" };
@@ -26,6 +27,18 @@ export async function createSezon(_prevState: ActionState, formData: FormData): 
   const sezon = await prisma.sezon.create({
     data: { filialId, name, theme: theme || null, startDate, endDate },
   });
+
+  if (copyFromSezonId) {
+    const sourceStoliki = await prisma.stolik.findMany({
+      where: { sezonId: copyFromSezonId, deletedAt: null },
+      orderBy: { createdAt: "asc" },
+    });
+    if (sourceStoliki.length > 0) {
+      await prisma.stolik.createMany({
+        data: sourceStoliki.map((s) => ({ sezonId: sezon.id, name: s.name })),
+      });
+    }
+  }
 
   revalidatePath(`/filials/${filialId}`);
   revalidatePath(`/sezony/${sezon.id}`);

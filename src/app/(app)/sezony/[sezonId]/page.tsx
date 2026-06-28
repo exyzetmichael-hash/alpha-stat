@@ -13,21 +13,19 @@ import { softDeleteSezonAndGoToFilial } from "@/lib/actions/sezon";
 import { DeleteButton } from "@/components/DeleteButton";
 import { SeasonEditor } from "@/components/SeasonEditor";
 import { SezonTabs, type SezonTab } from "@/components/SezonTabs";
-import { StolikCard } from "@/components/StolikCard";
-import { CreateStolikForm } from "@/components/CreateStolikForm";
+import { StolikiSearch } from "@/components/StolikiSearch";
 import { ToggleSection } from "@/components/ToggleSection";
-import { ParticipantRow } from "@/components/ParticipantRow";
-import { UchastnikForm } from "@/components/UchastnikForm";
 import { VehaRow } from "@/components/VehaRow";
 import { VehaForm } from "@/components/VehaForm";
 import { BudjetRow } from "@/components/BudjetRow";
 import { BudjetForm } from "@/components/BudjetForm";
 import { ReklamaRow } from "@/components/ReklamaRow";
 import { ReklamaForm } from "@/components/ReklamaForm";
-import { VypusknikRow } from "@/components/VypusknikRow";
-import { VypusknikForm } from "@/components/VypusknikForm";
+import { VypuskniySearch } from "@/components/VypuskniySearch";
 import { ZametkaRow } from "@/components/ZametkaRow";
 import { ZametkaForm } from "@/components/ZametkaForm";
+import { ExportLink } from "@/components/ExportLink";
+import { formatDateTimeRu } from "@/lib/format-date";
 
 export default async function SezonDetailPage({
   params,
@@ -89,57 +87,40 @@ export default async function SezonDetailPage({
 
   const status = getSezonStatus(sezon.startDate, sezon.endDate);
 
-  const sectionLabel = "text-xs font-bold uppercase tracking-wide text-gray-500";
+  const deleteStolikActions = Object.fromEntries(
+    sezon.stoliki.map((s) => [s.id, softDeleteStolik.bind(null, s.id, sezon.id)])
+  );
+  const deleteParticipantActions = Object.fromEntries(
+    [...sezon.stoliki.flatMap((s) => s.uchastniki), ...sezon.uchastniki].map((u) => [
+      u.id,
+      softDeleteUchastnik.bind(null, u.id, sezon.id),
+    ])
+  );
+
+  const auditLog = await prisma.auditLog.findMany({
+    where: { sezonId: sezon.id },
+    orderBy: { createdAt: "desc" },
+    take: 200,
+  });
 
   const tabs: SezonTab[] = [
     {
       id: "stoliki",
       label: "Столики",
       content: (
-        <div className="space-y-8">
-          <section className="space-y-3">
-            <p className={sectionLabel}>За столиками</p>
-            {sezon.stoliki.map((stolik) => (
-              <StolikCard
-                key={stolik.id}
-                sezonId={sezon.id}
-                stolik={stolik}
-                participants={stolik.uchastniki}
-                roles={stolikRoles}
-                deleteStolikAction={softDeleteStolik.bind(null, stolik.id, sezon.id)}
-                deleteParticipantActions={Object.fromEntries(
-                  stolik.uchastniki.map((u) => [u.id, softDeleteUchastnik.bind(null, u.id, sezon.id)])
-                )}
-              />
-            ))}
-            {sezon.stoliki.length === 0 && <p className="text-sm text-gray-500">Столиков пока нет.</p>}
-            <ToggleSection closedLabel="+ Добавить столик">
-              <CreateStolikForm sezonId={sezon.id} />
-            </ToggleSection>
-          </section>
-
-          <section className="space-y-3">
-            <p className={sectionLabel}>Команда вне столиков</p>
-            <p className="text-sm text-gray-500">Медиа, кухня, дети, молитва, музыкальное сопровождение и другие роли.</p>
-            <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              <div className="flex flex-col gap-1">
-                {sezon.uchastniki.map((participant) => (
-                  <ParticipantRow
-                    key={participant.id}
-                    sezonId={sezon.id}
-                    stolikId={null}
-                    roles={komandaRoles}
-                    participant={participant}
-                    deleteAction={softDeleteUchastnik.bind(null, participant.id, sezon.id)}
-                  />
-                ))}
-                {sezon.uchastniki.length === 0 && <p className="py-1 text-sm text-gray-500">Пока никого нет.</p>}
-              </div>
-            </div>
-            <ToggleSection closedLabel="+ Добавить участника">
-              <UchastnikForm mode="create" sezonId={sezon.id} stolikId={null} roles={komandaRoles} />
-            </ToggleSection>
-          </section>
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <ExportLink href={`/api/sezony/${sezon.id}/export/uchastniki`} />
+          </div>
+          <StolikiSearch
+            sezonId={sezon.id}
+            stoliki={sezon.stoliki}
+            komanda={sezon.uchastniki}
+            stolikRoles={stolikRoles}
+            komandaRoles={komandaRoles}
+            deleteStolikActions={deleteStolikActions}
+            deleteParticipantActions={deleteParticipantActions}
+          />
         </div>
       ),
     },
@@ -148,6 +129,9 @@ export default async function SezonDetailPage({
       label: "Бюджет",
       content: (
         <section className="space-y-3">
+          <div className="flex justify-end">
+            <ExportLink href={`/api/sezony/${sezon.id}/export/budjet`} />
+          </div>
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-gray-700">
               Расходы <span className="font-normal text-gray-500">— итого {rashodTotal.toLocaleString("ru-RU")} ₽</span>
@@ -241,22 +225,18 @@ export default async function SezonDetailPage({
       id: "vypuskniki",
       label: "Выпускники",
       content: (
-        <section className="space-y-3">
-          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-            {sezon.vypuskniki.map((vypusknik) => (
-              <VypusknikRow
-                key={vypusknik.id}
-                sezonId={sezon.id}
-                vypusknik={vypusknik}
-                deleteAction={softDeleteVypusknik.bind(null, vypusknik.id, sezon.id)}
-              />
-            ))}
-            {sezon.vypuskniki.length === 0 && <p className="py-1 text-sm text-gray-500">Выпускников пока нет.</p>}
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <ExportLink href={`/api/sezony/${sezon.id}/export/vypuskniki`} />
           </div>
-          <ToggleSection closedLabel="+ Добавить выпускника">
-            <VypusknikForm mode="create" sezonId={sezon.id} />
-          </ToggleSection>
-        </section>
+          <VypuskniySearch
+            sezonId={sezon.id}
+            vypuskniki={sezon.vypuskniki}
+            deleteActions={Object.fromEntries(
+              sezon.vypuskniki.map((v) => [v.id, softDeleteVypusknik.bind(null, v.id, sezon.id)])
+            )}
+          />
+        </div>
       ),
     },
     {
@@ -278,6 +258,23 @@ export default async function SezonDetailPage({
           <ToggleSection closedLabel="+ Добавить заметку">
             <ZametkaForm mode="create" sezonId={sezon.id} />
           </ToggleSection>
+        </section>
+      ),
+    },
+    {
+      id: "istoriya",
+      label: "История",
+      content: (
+        <section className="space-y-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            {auditLog.map((entry) => (
+              <div key={entry.id} className="border-b border-gray-100 py-2 last:border-none">
+                <p className="text-sm text-[#241A13]">{entry.summary}</p>
+                <p className="mt-0.5 text-xs text-gray-400">{formatDateTimeRu(entry.createdAt)}</p>
+              </div>
+            ))}
+            {auditLog.length === 0 && <p className="py-1 text-sm text-gray-500">Изменений пока нет.</p>}
+          </div>
         </section>
       ),
     },

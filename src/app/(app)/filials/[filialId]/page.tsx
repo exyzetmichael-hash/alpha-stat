@@ -44,7 +44,7 @@ export default async function FilialDetailPage({
       <SeasonList seasons={seasons} />
 
       <ToggleSection closedLabel="+ Добавить сезон">
-        <CreateSezonForm filialId={filial.id} />
+        <CreateSezonForm filialId={filial.id} previousSeasons={seasons.map((s) => ({ id: s.id, name: s.name }))} />
       </ToggleSection>
 
       <div className="border-t border-gray-200 pt-4">

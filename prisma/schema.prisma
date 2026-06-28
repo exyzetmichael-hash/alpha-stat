@@ -47,6 +47,7 @@ model Sezon {
   reklama      Reklama[]
   vypuskniki   Vypusknik[]
   zametki      Zametka[]
+  auditLog     AuditLog[]
 
   @@map("sezony")
 }
@@ -193,6 +194,23 @@ model Vypusknik {
   deletedAt DateTime?
 
   @@map("vypuskniki")
+}
+
+// Журнал изменений по участникам/выпускникам/бюджету (раздел "что и когда поменялось").
+// В приложении нет аккаунтов (один общий пароль на всех), поэтому без поля "кто" —
+// только что изменилось и когда.
+model AuditLog {
+  id      String @id @default(cuid())
+  sezonId String
+  sezon   Sezon  @relation(fields: [sezonId], references: [id])
+
+  entity  String // "Участник" | "Выпускник" | "Бюджет"
+  summary String
+
+  createdAt DateTime @default(now())
+
+  @@index([sezonId, createdAt])
+  @@map("audit_log")
 }
 
 // Идеи и заметки по событиям сезона (раздел 3.7 ТЗ)

@@ -7,7 +7,13 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
 import { useDraftAutosave, clearDraft } from "@/lib/use-draft-autosave";
 
-export function CreateSezonForm({ filialId }: { filialId: string }) {
+export function CreateSezonForm({
+  filialId,
+  previousSeasons = [],
+}: {
+  filialId: string;
+  previousSeasons?: { id: string; name: string }[];
+}) {
   const formRef = useRef<HTMLFormElement>(null);
   const storageKey = `draft:sezon:create:${filialId}`;
   useDraftAutosave(storageKey, formRef);
@@ -62,6 +68,26 @@ export function CreateSezonForm({ filialId }: { filialId: string }) {
           />
         </div>
       </div>
+
+      {previousSeasons.length > 0 && (
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            Скопировать столики из сезона (необязательно)
+          </label>
+          <select
+            name="copyFromSezonId"
+            defaultValue=""
+            className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-base focus:border-[#E63946] focus:outline-none focus:ring-2 focus:ring-[#E63946]/20"
+          >
+            <option value="">Не копировать</option>
+            {previousSeasons.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <FormError message={state?.error} />
       <SubmitButton pendingLabel="Добавляю...">Добавить сезон</SubmitButton>
