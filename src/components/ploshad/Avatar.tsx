@@ -82,21 +82,51 @@ export function Avatar({
           )}
         </AnimatePresence>
 
-        {/* Голова + туловище. При «сидит» слегка опускаем. */}
-        <div
-          className="flex flex-col items-center"
-          style={{ transform: sitting ? "translateY(4px)" : undefined }}
-        >
-          <div
-            className={`h-2.5 w-2.5 rounded-full ${walking ? "ploshad-bob" : ""}`}
-            style={{ backgroundColor: color }}
-          />
-          <div
-            className="-mt-0.5 h-4 w-3 rounded-t-full rounded-b-sm"
-            style={{ backgroundColor: color, height: sitting ? 11 : 16 }}
-          />
-        </div>
+        {/* Фигура-стикмен: голова-кольцо, торс, руки, ноги (прямые или «сидя»). */}
+        <StickFigure color={color} sitting={sitting} walking={walking} />
       </motion.div>
     </div>
+  );
+}
+
+function StickFigure({
+  color,
+  sitting,
+  walking,
+}: {
+  color: string;
+  sitting: boolean;
+  walking: boolean;
+}) {
+  return (
+    <svg
+      width="16"
+      height="26"
+      viewBox="0 0 16 26"
+      fill="none"
+      className={walking ? "ploshad-bob" : ""}
+    >
+      {/* Голова — кольцо без заливки */}
+      <circle cx="8" cy="4" r="3" stroke={color} strokeWidth="1.6" />
+      {/* Торс */}
+      <line x1="8" y1="7" x2="8" y2="16" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      {/* Руки */}
+      <line x1="8" y1="10" x2="3" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <line x1="8" y1="10" x2="13" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      {/* Ноги: сидя — колено вперёд, иначе прямо вниз */}
+      {sitting ? (
+        <>
+          <line x1="8" y1="16" x2="4" y2="18" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          <line x1="4" y1="18" x2="4" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          <line x1="8" y1="16" x2="12" y2="18" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          <line x1="12" y1="18" x2="12" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+        </>
+      ) : (
+        <>
+          <line x1="8" y1="16" x2="4" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          <line x1="8" y1="16" x2="12" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+        </>
+      )}
+    </svg>
   );
 }
