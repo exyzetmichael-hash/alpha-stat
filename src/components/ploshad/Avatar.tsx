@@ -89,6 +89,13 @@ export function Avatar({
   );
 }
 
+// Шаг ходьбы: руки/ноги качаются вокруг плеча/бедра в противофазе (как при
+// реальной походке — левая нога вперёд вместе с правой рукой). Колени/локти
+// не сгибаем — стикмен прямой, поэтому покачивание делаем поворотом самой
+// линии вокруг её верхней точки.
+const WALK_TRANSITION = { duration: 0.55, repeat: Infinity, ease: "easeInOut" } as const;
+const limbBox = { transformBox: "view-box" as const };
+
 function StickFigure({
   color,
   sitting,
@@ -98,22 +105,25 @@ function StickFigure({
   sitting: boolean;
   walking: boolean;
 }) {
+  const legLeft = walking ? { rotate: [18, -18, 18] } : { rotate: 0 };
+  const legRight = walking ? { rotate: [-18, 18, -18] } : { rotate: 0 };
+  const armLeft = walking ? { rotate: [-14, 14, -14] } : { rotate: 0 };
+  const armRight = walking ? { rotate: [14, -14, 14] } : { rotate: 0 };
+
   return (
-    <svg
-      width="16"
-      height="26"
-      viewBox="0 0 16 26"
-      fill="none"
-      className={walking ? "ploshad-bob" : ""}
-    >
+    <svg width="16" height="26" viewBox="0 0 16 26" fill="none" className={walking ? "ploshad-bob" : ""}>
       {/* Голова — кольцо без заливки */}
       <circle cx="8" cy="4" r="3" stroke={color} strokeWidth="1.6" />
       {/* Торс */}
       <line x1="8" y1="7" x2="8" y2="16" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
-      {/* Руки */}
-      <line x1="8" y1="10" x2="3" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
-      <line x1="8" y1="10" x2="13" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
-      {/* Ноги: сидя — колено вперёд, иначе прямо вниз */}
+      {/* Руки качаются от плеча (8,10) */}
+      <motion.g style={{ ...limbBox, transformOrigin: "8px 10px" }} animate={armLeft} transition={WALK_TRANSITION}>
+        <line x1="8" y1="10" x2="3" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      </motion.g>
+      <motion.g style={{ ...limbBox, transformOrigin: "8px 10px" }} animate={armRight} transition={WALK_TRANSITION}>
+        <line x1="8" y1="10" x2="13" y2="14" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      </motion.g>
+      {/* Ноги: сидя — колено вперёд (статично); иначе качаются от бедра (8,16) */}
       {sitting ? (
         <>
           <line x1="8" y1="16" x2="4" y2="18" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
@@ -123,8 +133,12 @@ function StickFigure({
         </>
       ) : (
         <>
-          <line x1="8" y1="16" x2="4" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
-          <line x1="8" y1="16" x2="12" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          <motion.g style={{ ...limbBox, transformOrigin: "8px 16px" }} animate={legLeft} transition={WALK_TRANSITION}>
+            <line x1="8" y1="16" x2="4" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          </motion.g>
+          <motion.g style={{ ...limbBox, transformOrigin: "8px 16px" }} animate={legRight} transition={WALK_TRANSITION}>
+            <line x1="8" y1="16" x2="12" y2="23" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+          </motion.g>
         </>
       )}
     </svg>
