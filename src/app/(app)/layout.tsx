@@ -1,6 +1,7 @@
 import { LogoutButton } from "@/components/LogoutButton";
 import { ReportErrorButton } from "@/components/ReportErrorButton";
 import { WhatsNewButton } from "@/components/WhatsNewButton";
+import { Ploshad } from "@/components/ploshad/Ploshad";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { PageTransition } from "@/components/motion/PageTransition";
 import { NavLink } from "@/components/motion/NavLink";
@@ -44,6 +45,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <ReportErrorButton />
         </footer>
         <WhatsNewButton />
+        <Ploshad />
       </div>
     </MotionProvider>
   );

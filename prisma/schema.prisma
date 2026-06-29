@@ -213,6 +213,38 @@ model AuditLog {
   @@map("audit_log")
 }
 
+// «Площадь» — лёгкий слой присутствия (как TownSquare): кто сейчас в сервисе.
+// Эфемерно и без аккаунтов: clientId генерится в браузере, имя/цвет выбирает сам
+// пользователь. Строки протухают и чистятся опросом (см. /api/ploshad/sync).
+model Presence {
+  id      String @id // clientId из браузера
+  name    String
+  color   String
+  x       Float // целевая позиция вдоль сцены, 0..1
+  facing  String   @default("right") // "left" | "right"
+  emote   String? // последняя эмоция: "highfive" | "jump"
+  emoteAt DateTime?
+
+  updatedAt DateTime @updatedAt
+
+  @@index([updatedAt])
+  @@map("presence")
+}
+
+// Короткие реплики «площади». Тоже эфемерны — держим только свежие.
+model PloshadMessage {
+  id       String @id @default(cuid())
+  clientId String
+  name     String
+  color    String
+  text     String
+
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("ploshad_message")
+}
+
 // Идеи и заметки по событиям сезона (раздел 3.7 ТЗ)
 model Zametka {
   id      String @id @default(cuid())
