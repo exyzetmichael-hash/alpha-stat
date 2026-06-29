@@ -13,7 +13,7 @@ const SYNC_LIMIT = 300;
 const SYNC_WINDOW_MS = 60 * 1000;
 
 const STALE_PRESENCE_MS = 30 * 1000; // строку старше — считаем ушедшим и удаляем
-const STALE_MESSAGE_MS = 10 * 60 * 1000; // реплики старше 10 мин не храним
+const STALE_MESSAGE_MS = 20 * 60 * 1000; // реплики старше 20 мин не храним
 const MAX_MESSAGES = 20;
 
 const FACINGS: Facing[] = ["left", "right"];
