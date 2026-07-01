@@ -7,14 +7,24 @@ import type { EmoteCode, Facing, Message, Peer, SyncResponse } from "@/lib/plosh
 // Состояние присутствия живёт в БД и меняется на каждом запросе — кэшировать нечего.
 export const dynamic = "force-dynamic";
 
-// Опрос ~раз в 1.5 с на клиента; лимит щедрый, т.к. вся команда может сидеть за одним
-// офисным IP (NAT). Это лишь мягкий порог от спама — счётчик в памяти инстанса.
-const SYNC_LIMIT = 300;
+// Эндпоинт уже за общим паролем (см. proxy.ts) — лимит по IP тут не столько
+// защита от чужих, сколько бэкстоп от одного зарвавшегося клиента/скрипта.
+// Считать его на весь офисный IP (NAT) нельзя: при 100+ людях за одним роутером
+// это моментально блокирует всех. Поэтому основной лимит — per-clientId
+// (у каждого браузера свой бюджет независимо от общего IP), а IP — широкий backstop.
+const SYNC_LIMIT_PER_CLIENT = 90; // с запасом на open-опрос (1.5с ⇒ 40/мин) + чат/эмоции
+const SYNC_LIMIT_PER_IP = 8000; // защита от реального шторма с одного адреса
 const SYNC_WINDOW_MS = 60 * 1000;
 
 const STALE_PRESENCE_MS = 30 * 1000; // строку старше — считаем ушедшим и удаляем
 const STALE_MESSAGE_MS = 20 * 60 * 1000; // реплики старше 20 мин не храним
 const MAX_MESSAGES = 20;
+
+// Оппортунистическая чистка нужна не на каждый запрос — достаточно раз в
+// несколько секунд на инстанс, иначе на потоке опроса это два лишних
+// full-таблу-скана delete на КАЖДЫЙ heartbeat каждого браузера.
+const CLEANUP_INTERVAL_MS = 5000;
+let lastCleanupAt = 0;
 
 const FACINGS: Facing[] = ["left", "right"];
 const EMOTES: EmoteCode[] = ["highfive", "jump"];
@@ -26,7 +36,8 @@ function clamp01(n: unknown): number {
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  if (!checkRateLimit(`ploshad:${ip}`, SYNC_LIMIT, SYNC_WINDOW_MS)) {
+  // Широкий backstop на IP — ловит только настоящий шторм, не легитимный офис за NAT.
+  if (!checkRateLimit(`ploshad-ip:${ip}`, SYNC_LIMIT_PER_IP, SYNC_WINDOW_MS)) {
     return NextResponse.json({ error: "rate limited" }, { status: 429 });
   }
 
@@ -40,6 +51,11 @@ export async function POST(request: NextRequest) {
   const clientId = typeof body.clientId === "string" ? body.clientId.trim() : "";
   if (!clientId || clientId.length > 100) {
     return NextResponse.json({ error: "no clientId" }, { status: 400 });
+  }
+
+  // Основной лимит — на конкретный браузер, не на общий офисный IP.
+  if (!checkRateLimit(`ploshad-client:${clientId}`, SYNC_LIMIT_PER_CLIENT, SYNC_WINDOW_MS)) {
+    return NextResponse.json({ error: "rate limited" }, { status: 429 });
   }
 
   // Уход со страницы (sendBeacon на unload): удаляем своё присутствие и выходим.
@@ -67,9 +83,15 @@ export async function POST(request: NextRequest) {
     await prisma.ploshadMessage.create({ data: { clientId, name, color, text } });
   }
 
-  // Оппортунистическая чистка — на serverless нет cron, поэтому подметаем на каждом запросе.
-  await prisma.presence.deleteMany({ where: { updatedAt: { lt: new Date(now - STALE_PRESENCE_MS) } } });
-  await prisma.ploshadMessage.deleteMany({ where: { createdAt: { lt: new Date(now - STALE_MESSAGE_MS) } } });
+  // Оппортунистическая чистка — на serverless нет cron, поэтому подметаем сами,
+  // но не на каждый heartbeat: раз в CLEANUP_INTERVAL_MS на инстанс достаточно,
+  // протухшие строки не накапливаются быстрее, а лишний full-scan delete на
+  // каждый из ~70 запросов/сек при 100+ людях не нужен.
+  if (now - lastCleanupAt >= CLEANUP_INTERVAL_MS) {
+    lastCleanupAt = now;
+    await prisma.presence.deleteMany({ where: { updatedAt: { lt: new Date(now - STALE_PRESENCE_MS) } } });
+    await prisma.ploshadMessage.deleteMany({ where: { createdAt: { lt: new Date(now - STALE_MESSAGE_MS) } } });
+  }
 
   const [presenceRows, messageRows] = await Promise.all([
     prisma.presence.findMany({

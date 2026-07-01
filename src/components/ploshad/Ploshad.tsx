@@ -15,6 +15,7 @@ import {
   BENCH_XS,
   BUBBLE_VISIBLE_MS,
   EMOTE_PLAY_MS,
+  IDLE_POLL_INTERVAL_MS,
   MAX_MESSAGE_LEN,
   POLL_INTERVAL_MS,
   PROPS,
@@ -55,6 +56,7 @@ export function Ploshad() {
   const prevPeerXRef = useRef<Map<string, number>>(new Map());
   const movedAtRef = useRef<Map<string, number>>(new Map());
   const walkTimerRef = useRef<number | null>(null);
+  const openRef = useRef(open);
 
   useEffect(() => {
     myXRef.current = myX;
@@ -107,12 +109,32 @@ export function Ploshad() {
     }
   }, []);
 
-  // Опрос: тик по таймеру (пауза на скрытой вкладке) + уход через sendBeacon.
+  // Открыл панель — сразу подтянуть свежую площадь, не дожидаясь следующего тика.
+  useEffect(() => {
+    openRef.current = open;
+    if (open) sync();
+  }, [open, sync]);
+
+  // Опрос: тик фиксированного таймера (пауза на скрытой вкладке) + уход через
+  // sendBeacon. Сам интервал не пересоздаём при сворачивании/разворачивании
+  // панели (иначе cleanup-эффект ниже слал бы sendBeacon(leaving) на каждый
+  // клик по крестику) — вместо этого читаем openRef внутри тика и, пока панель
+  // свёрнута, шлём heartbeat реже (раз в IDLE_POLL_INTERVAL_MS), а не на каждый тик.
   useEffect(() => {
     if (!ready) return;
     sync();
+    let lastIdleSyncAt = Date.now();
     const iv = window.setInterval(() => {
-      if (!document.hidden) sync();
+      if (document.hidden) return;
+      if (openRef.current) {
+        sync();
+        return;
+      }
+      const now = Date.now();
+      if (now - lastIdleSyncAt >= IDLE_POLL_INTERVAL_MS) {
+        lastIdleSyncAt = now;
+        sync();
+      }
     }, POLL_INTERVAL_MS);
     const onVisible = () => {
       if (!document.hidden) sync();
